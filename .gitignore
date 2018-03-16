@@ -7,4 +7,3 @@
 *.xlsx
 *.xls
 config.R
-redcap_api_call.R
