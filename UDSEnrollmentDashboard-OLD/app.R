@@ -12,10 +12,10 @@ source("./uds_plots.R", local = TRUE) # gets various plots
 ui <- dashboardPage(
   # Skin color
   skin = "blue",
-  
+
   # Header ----
   dashboardHeader(title = "Basic dashboard"),
-  
+
   # Sidebar ----
   dashboardSidebar(
     # Sidebar menu ----
@@ -25,22 +25,22 @@ ui <- dashboardPage(
       menuItem(text = "Maps", tabName = "maps", icon = icon("map"))
     )
   ), # end dashboardSideBar
-  
+
   # Body
   dashboardBody(
     tags$style(".fa-dashboard {color:#064193}"),
     tags$style(".fa-tint {color:#064193}"),
     tags$style(".fa-magnet {color:#064193}"),
-    
+
     # Tab container ----
     tabItems(
-      
+
       # First tab content
       tabItem(tabName = "summary",
               # Summary tab
               h2("Summary"),
               fluidRow(
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Count"]), 
+                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Count"]),
                          subtitle = "Total Enrolled", icon = icon("dashboard"), color = "navy"),
                 valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Blood_Drawn"]),
                          subtitle = "Blood Drawn", icon = icon("tint"), color = "navy"),
@@ -52,7 +52,7 @@ ui <- dashboardPage(
                 tableOutput("summary")
               )
       ), # end 1st tab
-      
+
       # Second tab content
       tabItem(tabName = "graphs",
               h2("Cumulative Enrollment"),
@@ -66,23 +66,23 @@ ui <- dashboardPage(
               ),
               h2("Cumulative vs. Target Enrollment by Diagnosis")
       ), # end 2nd tab
-      
+
       # Third tab content
       tabItem(tabName = "maps",
               h1("Maps tab content")
       ) # end 3rd tab
-      
+
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
 
 server <- function(input, output) {
-  
+
   # Summary table output
   output$summary <- renderTable({
     head(summ_tbl, n = nrow(summ_tbl))
   })
-  
+
   # Cumulative participant enrollment plot
   output$plot_cum_total <- renderPlot({
     ggplot(report_df, aes(x = exam_date, y = as.numeric(rownames(report_df)))) +
@@ -98,7 +98,7 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle(label = "Total Participants Over Time")
   })
-  
+
   # Cumulative participant enrollment by diagnosis plot
   output$plot_cum_dx <- renderPlot({
     ggplot(report_df, aes(x = exam_date, y = DxCumSum, group = uds_dx, color = uds_dx)) +
@@ -114,10 +114,10 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle(label = "Participants Over Time by Diagnosis")
   })
-  
+
   # Cumulative participant enrollment by sex plot
   output$plot_cum_sex <- renderPlot({
-    ggplot(report_df, aes(x = exam_date, y = SexCumSum, group = sex_value, color = sex_value)) + 
+    ggplot(report_df, aes(x = exam_date, y = SexCumSum, group = sex_value, color = sex_value)) +
       geom_line() +
       geom_vline(xintercept = Sys.Date(), color = "darkgrey", linetype = "longdash") +
       scale_x_date(name = "Visit Date",
@@ -130,10 +130,10 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle(label = "Participants Over Time by Sex")
   })
-  
+
   # Cumulative participant enrollment by race plot
   output$plot_cum_race <- renderPlot({
-    ggplot(report_df, aes(x = exam_date, y = RaceCumSum, group = race_value, color = race_value)) + 
+    ggplot(report_df, aes(x = exam_date, y = RaceCumSum, group = race_value, color = race_value)) +
       geom_line() +
       geom_vline(xintercept = Sys.Date(), color = "darkgrey", linetype = "longdash") +
       scale_x_date(name = "Visit Date",
@@ -146,18 +146,15 @@ server <- function(input, output) {
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       ggtitle(label = "Participants Over Time by Race")
   })
-  
+
   # set.seed(122)
   # histdata <- rnorm(500)
-  # 
+  #
   # output$plot1 <- renderPlot({
   #   data <- histdata[seq_len(input$slider)]
   #   hist(data)
   # })
-  
+
 }
 
 shinyApp(ui, server)
-
-
-

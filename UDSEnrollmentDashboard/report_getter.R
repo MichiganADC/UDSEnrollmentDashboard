@@ -4,17 +4,17 @@
 ##   output: `report_df`
 ################################################################################
 
-tryCatch({
-  source("./operational_switch.R", local = TRUE)
-}, warning = function(w) {
-  cat("In build/debugging mode. See warning below.\n")
-  print(w)
-}, finally = {
-  source("./UDSEnrollmentDashboard/operational_switch.R", local = TRUE)
-})
+# tryCatch({
+#   source("operational_switch.R", local = TRUE)
+# }, warning = function(w) {
+#   cat("In build/debugging mode. See warning below.\n")
+#   print(w)
+# }, finally = {
+#   source("./UDSEnrollmentDashboard/operational_switch.R", local = TRUE)
+# })
 
 if (operational) {  ### OPERATIONAL ###
-  source("./config.R", local = TRUE) # source REDCap API credentials + report ID
+  source("config.R", local = TRUE) # source REDCap API credentials + report ID
 } else {            ### DEBUGGING ###
   source("./UDSEnrollmentDashboard/config.R", local = TRUE) # source REDCap API credentials + report ID
 }

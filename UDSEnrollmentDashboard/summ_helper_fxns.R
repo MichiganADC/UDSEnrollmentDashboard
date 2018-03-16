@@ -2,6 +2,16 @@
 ## Helper functions for building UDS report summary table
 ################################################################################
 
+################################################################################
+## Load libraries
+#####
+library(dplyr)
+library(tidyr)
+
+################################################################################
+## Define helper functions
+#####
+
 # Fxn for outputting tables with one group variable
 single_grp_table <- function(x, group_var) {
   distinct_grp_vals <- distinct(x, !!group_var)
@@ -19,7 +29,7 @@ single_grp_filter_table <- function(x, group_var, filter_var, filter_var_string)
     group_by(!!group_var) %>% 
     filter(!!filter_var == filter_var_string) %>% 
     summarize(Count = n()) %>% 
-    right_join(distinct_grp_vals, by = rlang::quot_text(group_var)) %>% 
+    right_join(distinct_grp_vals, by = rlang::quo_text(group_var)) %>% 
     arrange(!!group_var)
 }
 
@@ -45,3 +55,13 @@ triple_grp_table <- function(x, group_var_1, group_var_2, group_var_3) {
     right_join(distinct_grp_vals, by = rlang::quo_text(group_var_1)) %>%
     arrange(!!group_var_1)
 }
+
+
+
+
+
+################################################################################
+################################################################################
+##############################    EXTRA  SPACE    ##############################
+################################################################################
+################################################################################

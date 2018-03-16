@@ -10,9 +10,9 @@
 
 # Test if there is at least one argument: if not, return an error
 # if (length(args) == 0) {
-#   stop("At least one argument must be supplied: [UMMAPMindsetRegistry].csv", 
+#   stop("At least one argument must be supplied: [UMMAPMindsetRegistry].csv",
 #        call. = FALSE)
-# } 
+# }
 # Maybe use this later if the user wants to name the output csv file
 # else if (length(args) == 1) {
 # # default output file
@@ -20,8 +20,8 @@
 #}
 # # Choose the csv file from the UMMAP Mindset Registry RC report
 # # report_df_file <- args[1]
-# report_df_file <- 
-#   file.path("input_csv", 
+# report_df_file <-
+#   file.path("input_csv",
 #             "UMMAPMindsetRegistry_DATA_LABELS_2018-03-05_1048.csv")
 # report_df <- read_csv(file = report_df_file, trim_ws = TRUE)
 
@@ -56,7 +56,7 @@ report_df <- read.csv(file = "report_df.csv",
 
 library(tidyverse)
 
-# names(report_df) <- 
+# names(report_df) <-
 #   gsub(pattern = "[ [:punct:]]", replacement = "_", names(report_df))
 # names(report_df)
 
@@ -67,13 +67,13 @@ report_df$race_value <- factor(report_df$race_value, levels = c("Black", "White"
 # Coerce 'Sex' column to factor
 report_df$sex_value <- factor(report_df$sex_value, levels = c("Female", "Male"))
 # Clean up 'uds_dx' column (few factors); Coerce 'uds_dx' column to factor
-report_df <- report_df %>% 
+report_df <- report_df %>%
   mutate(uds_dx = case_when(
     uds_dx == "Amnestic MCI-memory only" ~ "MCI",
     uds_dx == "Amnestic MCI-memory plus" ~ "MCI",
     uds_dx == "Amnestic MCI, multiple domains" ~ "MCI",
     uds_dx == "Amnestic MCI, single domain" ~ "MCI",
-    uds_dx == 
+    uds_dx ==
       "Amnestic multidomain dementia syndrome" ~ "Amnestic multidom dem",
     uds_dx == "Dem with Lewy bodies" ~ "LBD",
     # uds_dx == "FTD" ~ "FTD",
@@ -87,10 +87,10 @@ report_df <- report_df %>%
     is.na(uds_dx) & is.na(comp_withd) ~ "Pending consensus dx",
     TRUE ~ uds_dx
   ))
-report_df$uds_dx <- 
-  factor(report_df$uds_dx, 
-         levels = c("NL", "Impaired, not MCI", "MCI", "AD", 
-                    "Amnestic multidom dem", "LBD", "FTD", 
+report_df$uds_dx <-
+  factor(report_df$uds_dx,
+         levels = c("NL", "Impaired, not MCI", "MCI", "AD",
+                    "Amnestic multidom dem", "LBD", "FTD",
                     "Pending consensus dx", "Withdrew"))
 # Coerce 'Deceased_' column to logical
 report_df$pt_deceased <- as.logical(report_df$pt_deceased)
@@ -124,19 +124,19 @@ ggplot(report_df, aes(x = exam_date, y = as.numeric(rownames(report_df)))) +
 report_df <- bind_cols(report_df, data.frame(units = rep(1, nrow(report_df))))
 # Sex
 report_df <- report_df %>%
-  dplyr::group_by(sex_value) %>% 
+  dplyr::group_by(sex_value) %>%
   dplyr::mutate(SexCumSum = cumsum(units))
 # Race
 report_df <- report_df %>%
-  dplyr::group_by(race_value) %>% 
+  dplyr::group_by(race_value) %>%
   dplyr::mutate(RaceCumSum = cumsum(units))
 # Diagnosis (uds_dx)
-report_df <- report_df %>% 
-  dplyr::group_by(uds_dx) %>% 
+report_df <- report_df %>%
+  dplyr::group_by(uds_dx) %>%
   dplyr::mutate(DxCumSum = cumsum(units))
 
 # Plot cumulative participants by Sex
-ggplot(report_df, aes(x = exam_date, y = SexCumSum, group = sex_value, color = sex_value)) + 
+ggplot(report_df, aes(x = exam_date, y = SexCumSum, group = sex_value, color = sex_value)) +
   geom_line() +
   geom_vline(xintercept = Sys.Date(), color = "darkgrey", linetype = "longdash") +
   scale_x_date(name = "Visit Date",
@@ -150,7 +150,7 @@ ggplot(report_df, aes(x = exam_date, y = SexCumSum, group = sex_value, color = s
   ggtitle(label = "Participants Over Time by Sex")
 # ggsave(filename = "plots/UDS_Enrolled_plot-Participants_by_sex.png", width = 6, height = 4)
 # Plot cumulative participants by Race
-ggplot(report_df, aes(x = exam_date, y = RaceCumSum, group = race_value, color = race_value)) + 
+ggplot(report_df, aes(x = exam_date, y = RaceCumSum, group = race_value, color = race_value)) +
   geom_line() +
   geom_vline(xintercept = Sys.Date(), color = "darkgrey", linetype = "longdash") +
   scale_x_date(name = "Visit Date",

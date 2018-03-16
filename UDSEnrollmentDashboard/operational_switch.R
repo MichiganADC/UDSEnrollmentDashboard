@@ -4,7 +4,7 @@
 ##   operational = FALSE => build/debugging mode
 ################################################################################
 
-operational = FALSE
+operational = TRUE
 
 
 
