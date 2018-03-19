@@ -35,7 +35,7 @@ report_df_procsd <- report_df
 ## Keep only relevant fields / Discard irrlevant fields
 report_df_procsd <- report_df_procsd %>% 
   ## build / debugging
-  select(-redcap_event_name, -pt_deceased, -withdrew_date) 
+  select(-pt_deceased, -withdrew_date) 
   ## operational
   # select(-subject_id, -redcap_event_name, -pt_deceased, -withdrew_date)
 
@@ -45,6 +45,14 @@ report_df_procsd <- report_df_procsd %>%
 
 # names(report_df)
 
+## Coerce `redcap_event_name` to factor
+redcap_event_name_levels = c("Baseline", 
+                             paste0("Visit 0", 1:9), 
+                             paste0("Visit ", 10:15))
+report_df_procsd <- report_df_procsd %>% 
+  mutate(redcap_event_name = 
+           readr::parse_factor(redcap_event_name, 
+                               levels = redcap_event_name_levels))
 ## Coerce `exam_date` to Date class
 report_df_procsd$exam_date <- ymd(report_df_procsd$exam_date)
 ## Mutate `uds_dx` and coerce to factor class
@@ -120,7 +128,14 @@ report_df_procsd <- report_df_procsd %>%
 ## Check class of each field
 # vapply(X = report_df_procsd, FUN = class, FUN.VALUE = character(1))
 
+## Arrange data frame by subject_id (1st), then exam_date (2nd) 
+report_df_procsd <- report_df_procsd %>% 
+  arrange(subject_id, exam_date)
 
+## Clean out duplicate visits
+duplicated_subject_ids <- duplicated(report_df_procsd$subject_id)
+report_df_procsd <- report_df_procsd %>% 
+  filter(!duplicated_subject_ids)
 
 
 
