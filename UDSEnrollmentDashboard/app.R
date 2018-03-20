@@ -1,19 +1,21 @@
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Create dataframe for summary table / stats: 
 ##   input:  `summ_tbl`, ...
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-################################################################################
-## Load libraries
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Load libraries ----
+###
 library(shinydashboard)
+library(DT)
 library(ggplot2)
 
-################################################################################
-## Source `report_df_procsd` and helper functions
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Source `report_df_procsd` and helper functions ----
+###
 
 operational = TRUE
+table_menu_lengths <- c(5, 10, 15)
 
 if (operational) {  ### OPERATIONAL ###
   source("./report_df_summ_processor.R", local = TRUE)
@@ -25,9 +27,9 @@ if (operational) {  ### OPERATIONAL ###
   source("./UDSEnrollmentDashboard/plots_helper_fxns.R", local = TRUE)
 }
 
-################################################################################
-## ui
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## ui ----
+###
 
 ui <- dashboardPage(
   ## Skin color
@@ -67,34 +69,47 @@ ui <- dashboardPage(
                          subtitle = "MRI Completed", icon = icon("magnet"), color = "navy")
               ),
               fluidRow(
-                box(
+                box( ## Totals table
                   width = 6,
                   h3("Totals"),
-                  tableOutput("totals") ## Totals table
+                  # tableOutput("totals") 
+                  DT::dataTableOutput("totals")
                 ),
-                box(
+                box( ## Research table
                   width = 6,
                   h3("Research Data"),
-                  tableOutput("research") ## Research table
+                  # tableOutput("research") 
+                  DT::dataTableOutput("research") 
                 )
               ),
               fluidRow(
-                box(
+                box( ## Sex table
                   width = 6,
                   h3("Sex Data"),
-                  tableOutput("sex") ## Sex table
+                  # tableOutput("sex") 
+                  DT::dataTableOutput("sex") 
                 ),
-                box(
+                box( ## Race table
                   width = 6,
                   h3("Race Data"),
-                  tableOutput("race") # Race table
+                  # tableOutput("race") 
+                  DT::dataTableOutput("race") 
                 )
               ),
               fluidRow(
-                box(
+                box( ## Sex x Race table
                   width = 12,
                   h3("Sex + Race Data"),
-                  tableOutput("sex_race") # Sex x Race table
+                  # tableOutput("sex_race")
+                  DT::dataTableOutput("sex_race") 
+                )
+              ),
+              fluidRow(
+                box( ## UDS Version + Autopsy table
+                  width = 12,
+                  h3("UDS Version + Research Data"),
+                  # tableOutput("uds_autopsy")
+                  DT::dataTableOutput("uds_research")
                 )
               )
       ), ## end tabItem (first)
@@ -105,7 +120,6 @@ ui <- dashboardPage(
               fluidRow(
                 tabBox(
                   title = "Cumulative Enrollment",
-                  # The id lets us use input$tabset1 on the server to find the current tab
                   id = "tabset1", 
                   height = "550px",
                   tabPanel("Total",
@@ -116,10 +130,7 @@ ui <- dashboardPage(
                                plotOutput(outputId = "plot_cum_sex"))),
                   tabPanel("Race", 
                            box(width = 12, 
-                               plotOutput(outputId = "plot_cum_race"))) #,
-                  # tabPanel("Diagnosis", 
-                  #          box(width = 12, 
-                  #              plotOutput(outputId = "plot_cum_dx")))
+                               plotOutput(outputId = "plot_cum_race")))
                 ),
                 tabBox(
                   title = "Target Enrollment by Diagnosis",
@@ -171,9 +182,9 @@ ui <- dashboardPage(
   ) ## end dashboardBody
 ) ## end dashboardPage
 
-################################################################################
-## server
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## server ----
+###
 
 server <- function(input, output) {
   # ## Date testing
@@ -190,43 +201,65 @@ server <- function(input, output) {
   #   paste(input$dateRange2[2])
   # })
   
-  ################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
   
-  ## Summary table output ----
-  output$summary <- renderTable({
-    summ_tbl
-  })
+  # ## NOT USEFUL -- Summary table output ----
+  # output$summary <- renderTable({
+  #   summ_tbl
+  # })
   
   ## Total table output ----
-  output$totals <- renderTable({
-    total_tbl
+  # output$totals <- renderTable({ total_tbl })
+  output$totals <- DT::renderDataTable({
+    DT::datatable(total_tbl, 
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(total_tbl)))
   })
   
-  # ## Demographic table output ----
-  # output$demographic <- renderTable({
-  #   demo_tbl
-  # })
+  # ## NOT USEFUL -- Demographic table output ----
+  # output$demographic <- renderTable({ demo_tbl })
+  
   ## Sex table output ----
-  output$sex <- renderTable({
-    sex_tbl
+  # output$sex <- renderTable({ sex_tbl })
+  output$sex <- DT::renderDataTable({
+    DT::datatable(sex_tbl, 
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(sex_tbl)))
   })
   
   ## Race table output ----
-  output$race <- renderTable({
-    race_tbl
+  # output$race <- renderTable({ race_tbl })
+  output$race <- DT::renderDataTable({
+    DT::datatable(race_tbl, 
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(race_tbl)))
   })
   
   ## Sex x Race table output ----
-  output$sex_race <- renderTable({
-    sex_race_tbl
+  # output$sex_race <- renderTable({ sex_race_tbl })
+  output$sex_race <- DT::renderDataTable({
+    DT::datatable(sex_race_tbl, 
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(sex_race_tbl)))
   })
   
   ## Research table output ----
-  output$research <- renderTable({
-    rsrch_tbl
+  # output$research <- renderTable({ rsrch_tbl })
+  output$research <- DT::renderDataTable({
+    DT::datatable(rsrch_tbl, 
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(rsrch_tbl)))
   })
   
-  ################################################################################
+  ## UDS Version + Autopsy output ----
+  # output$uds_autopsy <- renderTable({ uds_autopsy_tbl })
+  output$uds_research <- DT::renderDataTable({
+    DT::datatable(uds_rsrch_tbl,
+                  options = list(lengthMenu = table_menu_lengths, 
+                                 pageLength = nrow(uds_rsrch_tbl)))
+  })
+  
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
   
   ## Cumulative enrollment totals ----
   output$plot_cum_total <- renderPlot({
@@ -237,7 +270,7 @@ server <- function(input, output) {
              end_date = as.Date(input$dateRange1[2]))
   })
   
-  # ## Cumulative enrollment by diagnosis plot ----
+  # ## NOT USEFUL -- Cumulative enrollment by diagnosis plot ----
   # output$plot_cum_dx <- renderPlot({
   #   cum_plot_single_grp(df = report_df_plots,
   #                       x = "exam_date", y = "dx_cum_sum",
@@ -321,9 +354,9 @@ server <- function(input, output) {
   })
 }
 
-################################################################################
-## shiny app
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## shiny app ----
+###
 
 shinyApp(ui, server)
 
@@ -331,8 +364,8 @@ shinyApp(ui, server)
 
 
 
-################################################################################
-################################################################################
-##############################    EXTRA  SPACE    ##############################
-################################################################################
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

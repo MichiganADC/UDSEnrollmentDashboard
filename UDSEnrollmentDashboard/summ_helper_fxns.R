@@ -1,16 +1,16 @@
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Helper functions for building UDS report summary table
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-################################################################################
-## Load libraries
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Load libraries ----
+###
 library(dplyr)
 library(tidyr)
 
-################################################################################
-## Define helper functions
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Define helper functions ----
+###
 
 # Fxn for outputting tables with one group variable
 single_grp_table <- function(x, group_var) {
@@ -20,7 +20,6 @@ single_grp_table <- function(x, group_var) {
     summarize(Total = n()) %>%
     right_join(distinct_grp_vals, by = rlang::quo_text(group_var)) %>%
     arrange(!!group_var)
-    # arrange(!!tolower(group_var))
 }
 
 # Fxn for outputting tables with one group variable and one filter variable
@@ -32,7 +31,6 @@ single_grp_filter_table <- function(x, group_var, filter_var, filter_var_string)
     summarize(Total = n()) %>% 
     right_join(distinct_grp_vals, by = rlang::quo_text(group_var)) %>% 
     arrange(!!group_var)
-    # arrange(!!tolower(group_var))
 }
 
 # Fxn for outputting tables with two group variables
@@ -44,7 +42,18 @@ double_grp_table <- function(x, group_var_1, group_var_2) {
     spread(!!group_var_2, Total) %>% 
     right_join(distinct_grp_vals, by = rlang::quo_text(group_var_1)) %>%
     arrange(!!group_var_1)
-    # arrange(!!tolower(group_var))
+}
+
+# Fxn for outputting tables with two group variables and one filter variable
+double_grp_filter_table <- function(x, group_var_1, group_var_2, filter_var, filter_var_string) {
+  distinct_grp_vals <- distinct(x, !!group_var_1)
+  x %>% 
+    group_by(!!group_var_1, !!group_var_2) %>% 
+    filter(!!filter_var == filter_var_string) %>% 
+    summarize(Total = n()) %>% 
+    spread(!!group_var_2, Total) %>%
+    right_join(distinct_grp_vals, by = rlang::quo_text(group_var_1)) %>%
+    arrange(!!group_var_1)
 }
 
 # Fxn for outputting tables with three group variables
@@ -57,7 +66,17 @@ triple_grp_table <- function(x, group_var_1, group_var_2, group_var_3) {
     spread(United, Total) %>% 
     right_join(distinct_grp_vals, by = rlang::quo_text(group_var_1)) %>%
     arrange(!!group_var_1)
-    # arrange(!!tolower(group_var))
+}
+
+# Fxn for outputting tables with two group variables and one filter variable
+triple_grp_filter_table <- function(x, group_var_1, group_var_2, group_var_3, filter_var, filter_var_string) {
+  distinct_grp_vals <- distinct(x, !!group_var_1)
+  x %>% 
+    group_by(!!group_var_1, !!group_var_2, !!group_var_3) %>% 
+    filter(!!filter_var == filter_var_string) %>% 
+    summarize(Total = n()) %>% 
+    right_join(distinct_grp_vals, by = rlang::quo_text(group_var_1)) %>% 
+    arrange(!!group_var_1)
 }
 
 add_totals_row <- function(data_tbl) {
@@ -76,7 +95,8 @@ add_totals_row <- function(data_tbl) {
 }
 
 add_proportions_row <- function(data_tbl) {
-  pt_sum <- as.integer(data_tbl[data_tbl$uds_dx == "Totals", "Total"])
+  # pt_sum <- as.integer(data_tbl[data_tbl$uds_dx == "Totals", "Total"])
+  pt_sum <- data_tbl %>% filter(uds_dx == "Totals") %>% .[, "Total"] %>% as.integer(.)
   get_proportion <- function(x) {
     round(sum(x, na.rm = TRUE) / pt_sum, 2)
   }
@@ -95,8 +115,8 @@ add_proportions_row <- function(data_tbl) {
 
 
 
-################################################################################
-################################################################################
-##############################    EXTRA  SPACE    ##############################
-################################################################################
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

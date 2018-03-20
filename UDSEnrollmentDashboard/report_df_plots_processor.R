@@ -1,12 +1,12 @@
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Create dataframe for plots: 
 ##   input:  `report_df_procsd`
 ##   output: `report_df_plots`
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-################################################################################
-## Source `report_df_procsd` and helper functions
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Source `report_df_procsd` and helper functions ----
+###
 
 # tryCatch({
 #   source("operational_switch.R", local = TRUE)
@@ -25,14 +25,14 @@ if (operational) {  ### OPERATIONAL ###
   # source("./UDSEnrollmentDashboard/plots_helper_fxns.R", local = TRUE)
 }
 
-################################################################################
-## Load libraries
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Load libraries ----
+###
 library(dplyr)
 
-################################################################################
-## Prepare output dataframe
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Prepare output dataframe ----
+###
 
 ## Copy report_df_procsd
 report_df_plots <- report_df_procsd
@@ -42,9 +42,9 @@ report_df_plots <- report_df_plots %>%
   select(subject_id, exam_date, uds_dx, race_value, sex_value) %>% 
   arrange(exam_date)
 
-################################################################################
-## Create CumSum fields
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Create CumSum fields ----
+###
 
 ## Start with a `units` field (to do cumsum counting)
 report_df_plots <- bind_cols(report_df_plots,
@@ -69,9 +69,10 @@ report_df_plots <- report_df_plots %>%
   group_by(sex_value) %>% 
   mutate(sex_cum_sum = cumsum(units))
 
-################################################################################
-## Add target diagnosis rows (e.g., "NL target", "MCI target", etc.)
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Add target diagnosis rows ----
+## ... (e.g., "NL target", "MCI target", etc.)
+###
 
 # Fxn to abstract away the row-adding work
 add_dx_target_rows <- function(df, dx, dx_target, annual_targets) {
@@ -117,8 +118,8 @@ report_df_plots <- add_dx_target_rows(report_df_plots, "FTD", "FTD target",
 
 
 
-################################################################################
-################################################################################
-##############################    EXTRA  SPACE    ##############################
-################################################################################
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

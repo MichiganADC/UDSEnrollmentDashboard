@@ -1,15 +1,15 @@
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Process report_df for three different purposes:
 ##   1. Summary table / stats      -- report_df_summ
 ##   2. Plots of enrollment        -- report_df_plots
 ##   3. Maps of partic. enrollment -- report_df_maps
 ##   input:  `report_df`
 ##   output: `report_df_procsd`
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-################################################################################
-## Source `report_df`
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Source `report_df` ----
+###
 
 if (operational) {  ### OPERATIONAL ###
   source("report_getter.R", local = TRUE) # source `report_df`
@@ -17,17 +17,17 @@ if (operational) {  ### OPERATIONAL ###
   source("./UDSEnrollmentDashboard/report_getter.R", local = TRUE) 
 }
 
-################################################################################
-## Load libraries
-#####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Load libraries ----
+###
 
 library(dplyr)
 library(lubridate) # tidyverse dates
 library(forcats)   # tidyverse factors
 
-################################################################################
-## Prepare output dataframe
-####
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Prepare output dataframe ----
+###
 
 ## Copy report_df
 report_df_procsd <- report_df
@@ -39,9 +39,13 @@ report_df_procsd <- report_df_procsd %>%
   ## operational
   # select(-subject_id, -redcap_event_name, -pt_deceased, -withdrew_date)
 
-################################################################################
-## Mutate each field appropriately and coerce to appropriate class
-#####
+## Copy uds2_id_df
+uds2_id_df_procsd <- uds2_id_df
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Process report_df_procsd ----
+## ... mutate each field appropriately and coerce to appropriate class
+###
 
 # names(report_df)
 
@@ -58,7 +62,7 @@ report_df_procsd$exam_date <- ymd(report_df_procsd$exam_date)
 ## Mutate `uds_dx` and coerce to factor class
 dx_levels <- c("MCI", "NL", "LBD", "AD", "Impaired, not MCI", 
                "Pending consensus", "FTD", "Withdrew", 
-               "Amnestic multidomain", 
+               "Amnestic multidomain", "Other",
                # target diagnoses
                "MCI target", "NL target", "LBD target",
                "AD target", "FTD target")
@@ -71,18 +75,29 @@ report_df_procsd <- report_df_procsd %>%
     uds_dx == "Amnestic multidomain dementia syndrome" 
                                                   ~ "Amnestic multidomain",
     uds_dx == "Dem with Lewy bodies"              ~ "LBD",
-    # uds_dx == "FTD"                               ~ "FTD",
-    # uds_dx == "Impaired, not MCI"                 ~ "Impaired, not MCI",
-    # uds_dx == "NL"                                ~ "NL",
+    uds_dx == "FTD"                               ~ "FTD",
+    uds_dx == "Impaired, not MCI"                 ~ "Impaired, not MCI",
+    uds_dx == "NL"                                ~ "NL",
     uds_dx == "Non-Amnestic MCI-multiple domains" ~ "MCI",
     uds_dx == "Non-Amnestic MCI-single domain"    ~ "MCI",
+    uds_dx == "Other"                             ~ "Other",
+    uds_dx == "Patient never came to consensus"   ~ "Withdrew",
+    uds_dx == "Per Center Decision-patient did not come to consensus-milestoned out of study"
+                                                  ~ "Withdrew",
+    uds_dx == "Possible AD"                       ~ "AD",
     uds_dx == "Primary progressive aphasia"       ~ "FTD",
     uds_dx == "Probable AD"                       ~ "AD",
+    uds_dx == "Vascular dem"                      ~ "Other",
     is.na(uds_dx) & comp_withd == "Y"             ~ "Withdrew",
     uds_dx == "" & comp_withd == "Y"              ~ "Withdrew",
     is.na(uds_dx) & is.na(comp_withd)             ~ "Pending consensus",
     uds_dx == "" & comp_withd == ""               ~ "Pending consensus",
-    is.na(uds_dx) | uds_dx == ""                  ~ "",
+    is.na(uds_dx) & comp_withd == ""              ~ "Pending consensus",
+    uds_dx == "" & is.na(comp_withd)              ~ "Pending consensus",
+    # uds_dx == "<NA>"                              ~ "Other",
+    is.na(uds_dx) | uds_dx == ""                  ~ "Other",
+    # is.na(uds_dx)                                 ~ "Other",
+    # uds_dx == ""                                  ~ "Other",
     TRUE ~ uds_dx
   )) %>% 
   mutate(uds_dx = readr::parse_factor(uds_dx, levels = dx_levels))
@@ -94,6 +109,16 @@ race_levels = c("Asian", "Black", "Other", "White",
                 "American Indian or Alaska Native", 
                 "Native Hawaiian or Other Pacific Islander")
 report_df_procsd <- report_df_procsd %>% 
+  mutate(race_value = case_when(
+    race_value == "Asian"    ~ "Asian",
+    race_value == "Black"    ~ "Black",
+    race_value == "Other"    ~ "Other",
+    race_value == "White"    ~ "White",
+    race_value == "Hispanic" ~ "Other",
+    race_value == ""         ~ "Other",
+    is.na(race_value)        ~ "Other"
+  )) %>% 
+# report_df_procsd <- report_df_procsd %>% 
   mutate(race_value = readr::parse_factor(race_value, levels = race_levels))
   # mutate(race_value = as_factor(race_value, levels = race_levels)) 
 # levels(report_df_procsd$race_value)
@@ -137,10 +162,23 @@ duplicated_subject_ids <- duplicated(report_df_procsd$subject_id)
 report_df_procsd <- report_df_procsd %>% 
   filter(!duplicated_subject_ids)
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Process uds2_id_procsd ----
+## ... add a simple `in_uds2` logical column
+###
+uds2_id_df_procsd <- uds2_id_df_procsd %>% 
+  mutate(uds_version = "UDS 2/3")
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Left join report_df_procsd and uds2_id_procsd ----
+###
+report_df_procsd <- report_df_procsd %>% 
+  left_join(uds2_id_df_procsd, by = "subject_id") %>% 
+  mutate(uds_version = ifelse(is.na(uds_version), "UDS 3", uds_version))
 
 
-################################################################################
-################################################################################
-##############################    EXTRA  SPACE    ##############################
-################################################################################
-################################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
