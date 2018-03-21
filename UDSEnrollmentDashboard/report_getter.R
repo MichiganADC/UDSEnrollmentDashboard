@@ -58,7 +58,7 @@ if (!exists("uds2_id_df")) {
         .opts = list(ssl.verifypeer = TRUE, verbose = TRUE)
       )
     ) %>% 
-    select(subject_id) # only get the `subject_id` column
+    dplyr::select(subject_id) # only get the `subject_id` column
 }
 
 
