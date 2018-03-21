@@ -14,16 +14,22 @@ library(ggplot2)
 ## Source `report_df_procsd` and helper functions ----
 ###
 
-operational = TRUE
-table_menu_lengths <- c(5, 10, 15)
+operational <- TRUE
+# table_menu_lengths <- c(5, 10, 15)
+dt_options <- list(paging = FALSE,
+                   searching = FALSE,
+                   ordering = FALSE,
+                   info = FALSE)
 
 if (operational) {  ### OPERATIONAL ###
   source("./report_df_summ_processor.R", local = TRUE)
   source("./report_df_plots_processor.R", local = TRUE)
+  source("./report_df_maps_processor.R", local = TRUE)
   source("./plots_helper_fxns.R", local = TRUE)
 } else {            ### DEBUGGING ###
   source("./UDSEnrollmentDashboard/report_df_summ_processor.R", local = TRUE)
   source("./UDSEnrollmentDashboard/report_df_plots_processor.R", local = TRUE)
+  source("./UDSEnrollmentDashboard/report_df_maps_processor.R", local = TRUE)
   source("./UDSEnrollmentDashboard/plots_helper_fxns.R", local = TRUE)
 }
 
@@ -63,52 +69,60 @@ ui <- dashboardPage(
               fluidRow(
                 valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Total"]),
                          subtitle = "Total Enrolled", icon = icon("dashboard"), color = "navy"),
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Blood_Drawn"]),
+                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Blood Drawn Yes"]),
                          subtitle = "Blood Drawn", icon = icon("tint"), color = "navy"),
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "MRI_Yes"]),
+                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "MRI Yes"]),
                          subtitle = "MRI Completed", icon = icon("magnet"), color = "navy")
               ),
               fluidRow(
-                box( ## Totals table
-                  width = 6,
-                  h3("Totals"),
-                  # tableOutput("totals") 
-                  DT::dataTableOutput("totals")
+                box( ## Sex table
+                  width = 12,
+                  h3("Sex"),
+                  # tableOutput("sex")
+                  DT::dataTableOutput("sex")
                 ),
-                box( ## Research table
-                  width = 6,
-                  h3("Research Data"),
-                  # tableOutput("research") 
-                  DT::dataTableOutput("research") 
+                box( ## Race table
+                  width = 12,
+                  h3("Race"),
+                  # tableOutput("race")
+                  DT::dataTableOutput("race")
                 )
               ),
               fluidRow(
-                box( ## Sex table
-                  width = 6,
-                  h3("Sex Data"),
-                  # tableOutput("sex") 
-                  DT::dataTableOutput("sex") 
+                box( ## UDS Version table
+                  width = 12,
+                  h3("UDS Version"),
+                  # tableOutput("uds_vers")
+                  DT::dataTableOutput("uds_vers")
                 ),
-                box( ## Race table
+                box( ## Research table
+                  width = 12,
+                  h3("Research"),
+                  # tableOutput("research")
+                  DT::dataTableOutput("research")
+                )
+              ),
+              fluidRow(
+                box( ## UDS 3 Visit table
                   width = 6,
-                  h3("Race Data"),
-                  # tableOutput("race") 
-                  DT::dataTableOutput("race") 
+                  h3("UDS 3.0 Visits*"),
+                  DT::dataTableOutput("uds3_visit"),
+                  h6("* 19 participants started at Visit 2")
                 )
               ),
               fluidRow(
                 box( ## Sex x Race table
                   width = 12,
-                  h3("Sex + Race Data"),
+                  h3("Sex + Race"),
                   # tableOutput("sex_race")
-                  DT::dataTableOutput("sex_race") 
+                  DT::dataTableOutput("sex_race")
                 )
               ),
               fluidRow(
-                box( ## UDS Version + Autopsy table
+                box( ## UDS Version + Research table
                   width = 12,
-                  h3("UDS Version + Research Data"),
-                  # tableOutput("uds_autopsy")
+                  h3("UDS Version + Research"),
+                  # tableOutput("uds_research")
                   DT::dataTableOutput("uds_research")
                 )
               )
@@ -176,7 +190,18 @@ ui <- dashboardPage(
                   # verbatimTextOutput("dateRange2Text2")
                 )
               ) # end fluid row 2
-      ) ## end tabItem (second)
+      ), ## end tabItem (second)
+      
+      tabItem(tabName = "maps",
+              h2("Maps"),
+              fluidRow(
+                box(
+                  width = 12,
+                  height = "625px",
+                  plotOutput(outputId = "map_partic_by_county")
+                )
+              ) # end fluid row 1
+      ) ## end tabItem (third)
       
     ) ## end tabItems
   ) ## end dashboardBody
@@ -187,76 +212,52 @@ ui <- dashboardPage(
 ###
 
 server <- function(input, output) {
-  # ## Date testing
-  # output$dateRange1Text1 <- renderText({
-  #   paste(input$dateRange1[1])
-  # })
-  # output$dateRange1Text2 <- renderText({
-  #   paste(input$dateRange1[2])
-  # })
-  # output$dateRange2Text1 <- renderText({
-  #   paste(input$dateRange2[1])
-  # })
-  # output$dateRange2Text2 <- renderText({
-  #   paste(input$dateRange2[2])
-  # })
-  
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-  
+
   # ## NOT USEFUL -- Summary table output ----
   # output$summary <- renderTable({
   #   summ_tbl
   # })
   
-  ## Total table output ----
-  # output$totals <- renderTable({ total_tbl })
-  output$totals <- DT::renderDataTable({
-    DT::datatable(total_tbl, 
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(total_tbl)))
-  })
-  
-  # ## NOT USEFUL -- Demographic table output ----
-  # output$demographic <- renderTable({ demo_tbl })
-  
   ## Sex table output ----
   # output$sex <- renderTable({ sex_tbl })
   output$sex <- DT::renderDataTable({
-    DT::datatable(sex_tbl, 
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(sex_tbl)))
+    DT::datatable(sex_tbl, options = dt_options)
   })
   
   ## Race table output ----
   # output$race <- renderTable({ race_tbl })
   output$race <- DT::renderDataTable({
-    DT::datatable(race_tbl, 
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(race_tbl)))
+    DT::datatable(race_tbl, options = dt_options)
   })
   
-  ## Sex x Race table output ----
-  # output$sex_race <- renderTable({ sex_race_tbl })
-  output$sex_race <- DT::renderDataTable({
-    DT::datatable(sex_race_tbl, 
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(sex_race_tbl)))
+  ## UDS Version table output ----
+  # output$uds_vers <- renderTable({ uds_vers_tbl })
+  output$uds_vers <- DT::renderDataTable({
+    DT::datatable(uds_vers_tbl, options = dt_options)
   })
   
   ## Research table output ----
   # output$research <- renderTable({ rsrch_tbl })
   output$research <- DT::renderDataTable({
-    DT::datatable(rsrch_tbl, 
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(rsrch_tbl)))
+    DT::datatable(rsrch_tbl, options = dt_options)
+  })
+  
+  ## UDS 3.0 Visit table output
+  # output$uds3_visit <- renderTable({ uds3_visit_tbl })
+  output$uds3_visit <- DT::renderDataTable({
+    DT::datatable(uds3_visit_tbl, options = dt_options)
+  })
+  
+  ## Sex x Race table output ----
+  # output$sex_race <- renderTable({ sex_race_tbl })
+  output$sex_race <- DT::renderDataTable({
+    DT::datatable(sex_race_tbl, options = dt_options)
   })
   
   ## UDS Version + Autopsy output ----
   # output$uds_autopsy <- renderTable({ uds_autopsy_tbl })
   output$uds_research <- DT::renderDataTable({
-    DT::datatable(uds_rsrch_tbl,
-                  options = list(lengthMenu = table_menu_lengths, 
-                                 pageLength = nrow(uds_rsrch_tbl)))
+    DT::datatable(uds_rsrch_tbl, options = dt_options)
   })
   
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -352,6 +353,22 @@ server <- function(input, output) {
                           start_date = as.Date(input$dateRange2[1]), 
                           end_date = as.Date(input$dateRange2[2]))
   })
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  
+  ## Participation by County map
+  output$map_partic_by_county <- renderPlot({
+    mi_base_map +
+      geom_polygon(data = mi_counties_partic_count, aes(fill = Count),
+                   color = "black", size = 0.1) +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      nix_lat_long_grid +
+      scale_fill_gradient(low = "#FFFFFF", high = "darkblue",
+                          breaks = c(1, 20, 40, 60, 80, 100)) +
+      ggtitle(label = "Participant Counts by County", 
+              subtitle = "March 2017 to Present")
+  }, height = 600)
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

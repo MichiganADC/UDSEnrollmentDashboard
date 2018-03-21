@@ -7,16 +7,6 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Source `report_df_procsd` and helper functions ----
 ###
-
-# tryCatch({
-#   source("operational_switch.R", local = TRUE)
-# }, warning = function(w) {
-#   cat("In build/debugging mode. See warning below.\n")
-#   print(w)
-# }, finally = {
-#   source("./UDSEnrollmentDashboard/operational_switch.R", local = TRUE)
-# })
-
 if (operational) {  ### OPERATIONAL ###
   source("./report_processor.R", local = TRUE)
   # source("./plots_helper_fxns.R", local = TRUE)
@@ -114,6 +104,7 @@ report_df_plots <- add_dx_target_rows(report_df_plots, "LBD", "LBD target",
 ## Add "FTD target" rows to `report_df_plots`
 report_df_plots <- add_dx_target_rows(report_df_plots, "FTD", "FTD target",
                                       c(0, 5, 19, 22, 35, 36))
+
 
 
 

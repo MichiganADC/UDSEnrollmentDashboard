@@ -39,7 +39,7 @@ if (!exists("report_df")) {
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## Get UDS 2.0 report data ----
+## Get UDS 2.0 IDs report data ----
 ###
 if (!exists("uds2_id_df")) {
   ## Project report: RCurl post => JSON => data.frame
@@ -59,6 +59,30 @@ if (!exists("uds2_id_df")) {
       )
     ) %>% 
     dplyr::select(subject_id) # only get the `subject_id` column
+}
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Get UDS 3.0 IDs report data ----
+###
+if (!exists("uds3_id_visit_df")) {
+  ## Project report: RCurl post => JSON => data.frame
+  uds3_id_visit_df <- 
+    fromJSON(
+      postForm(
+        uri = API_URL,
+        token = UDS3_API_TOKEN,
+        content = 'report',
+        format = 'json',
+        report_id = UDS3_REPORT_ID,
+        rawOrLabel = 'label',
+        rawOrLabelHeaders = 'label',
+        exportCheckboxLabel = 'false',
+        returnFormat = 'json',
+        .opts = list(ssl.verifypeer = TRUE, verbose = TRUE)
+      )
+    ) %>% 
+    dplyr::select(ptid, redcap_event_name) %>% # only get these columns
+    dplyr::rename(subject_id = ptid) # rename ptid to subject_id
 }
 
 

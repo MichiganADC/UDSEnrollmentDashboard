@@ -42,6 +42,9 @@ report_df_procsd <- report_df_procsd %>%
 ## Copy uds2_id_df
 uds2_id_df_procsd <- uds2_id_df
 
+## Copy uds3_id_visit_df
+# uds3_id_visit_df_procsd <- uds3_id_visit_df
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Process report_df_procsd ----
 ## ... mutate each field appropriately and coerce to appropriate class
@@ -175,6 +178,27 @@ uds2_id_df_procsd <- uds2_id_df_procsd %>%
 report_df_procsd <- report_df_procsd %>% 
   left_join(uds2_id_df_procsd, by = "subject_id") %>% 
   mutate(uds_version = ifelse(is.na(uds_version), "UDS 3", uds_version))
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Process uds3_id_visit_procsd ----
+###
+## Add units column and arrange appropriately
+uds3_visit_tbl <- uds3_id_visit_df %>% 
+  # mutate(units = 1) %>% 
+  arrange(subject_id, desc(redcap_event_name))
+## Keep only most recent visit
+uds3_visit_tbl <- uds3_visit_tbl[!duplicated(uds3_visit_tbl$subject_id), ]
+## Create uds3_visit_tbl
+uds3_visit_tbl <- uds3_visit_tbl %>% 
+  inner_join(data_frame(subject_id = report_df_procsd$subject_id), by = "subject_id") %>% 
+  arrange(subject_id) %>% 
+  group_by(redcap_event_name) %>% 
+  summarize(Count = n()) %>% 
+  right_join(data_frame(redcap_event_name = paste("Visit", 1:15)), by = "redcap_event_name") %>% 
+  rename(Visit = redcap_event_name)
+
+
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

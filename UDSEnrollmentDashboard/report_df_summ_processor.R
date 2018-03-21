@@ -117,7 +117,7 @@ uds_blood_yes_cts <-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Stitch different *_cts dfs together ----
 ###
-total_tbl <- 
+uds_vers_tbl <- 
   bind_cols(total_cts, uds_vers_cts[, -1]) %>% 
   arrange(tolower(uds_dx))
 
@@ -159,36 +159,45 @@ summ_tbl <-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Build `totals_row` row and rbind it to each summary table ----
 ###
-summ_tbl <- add_totals_row(summ_tbl)
-total_tbl <- add_totals_row(total_tbl)
-# demo_tbl <- add_totals_row(demo_tbl)
 sex_tbl <- add_totals_row(sex_tbl)
 race_tbl <- add_totals_row(race_tbl)
-sex_race_tbl <- add_totals_row(sex_race_tbl)
 rsrch_tbl <- add_totals_row(rsrch_tbl)
+uds_vers_tbl <- add_totals_row(uds_vers_tbl)
+sex_race_tbl <- add_totals_row(sex_race_tbl)
 uds_rsrch_tbl <- add_totals_row(uds_rsrch_tbl)
+summ_tbl <- add_totals_row(summ_tbl)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Build a `proportions_row` row and rbind it to each summary table ----
 ###
-summ_tbl <- add_proportions_row(summ_tbl)
-total_tbl <- add_proportions_row(total_tbl)
-# demo_tbl <- add_proportions_row(demo_tbl)
 sex_tbl <- add_proportions_row(sex_tbl)
 race_tbl <- add_proportions_row(race_tbl)
-sex_race_tbl <- add_proportions_row(sex_race_tbl)
 rsrch_tbl <- add_proportions_row(rsrch_tbl)
+uds_vers_tbl <- add_proportions_row(uds_vers_tbl)
+sex_race_tbl <- add_proportions_row(sex_race_tbl)
 uds_rsrch_tbl <- add_proportions_row(uds_rsrch_tbl)
+summ_tbl <- add_proportions_row(summ_tbl)
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## Coerce all numeric columns to numeric ----
+###
+sex_tbl[, -1] <- purrr::map(sex_tbl[, -1], as.numeric)
+race_tbl[, -1] <- purrr::map(race_tbl[, -1], as.numeric)
+rsrch_tbl[, -1] <- purrr::map(rsrch_tbl[, -1], as.numeric)
+uds_vers_tbl[, -1] <- purrr::map(uds_vers_tbl[, -1], as.numeric)
+sex_race_tbl[, -1] <- purrr::map(sex_race_tbl[, -1], as.numeric)
+uds_rsrch_tbl[, -1] <- purrr::map(uds_rsrch_tbl[, -1], as.numeric)
+# summ_tbl[, -1], purrr::map(summ_tbl[, -1], as.numeric)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Rename last four headers (generalize this later) ----
 ###
 summ_tbl <- summ_tbl %>%
-  rename(Autopsy_Yes = Total1, Autopsy_Consider = Total2,
-         MRI_Yes = Total3, Blood_Drawn = Total4)
+  rename(`Autopsy Yes` = Total1, `Autopsy Considering` = Total2,
+         `MRI Yes` = Total3, `Blood Drawn Yes` = Total4)
 rsrch_tbl <- rsrch_tbl %>% 
-  rename(Autopsy_Yes = Total1, Autopsy_Consider = Total2,
-         MRI_Yes = Total3, Blood_Drawn = Total4)
+  rename(`Autopsy Yes` = Total1, `Autopsy Considering` = Total2,
+         `MRI Yes` = Total3, `Blood Drawn Yes` = Total4)
 uds_rsrch_tbl <- uds_rsrch_tbl %>% 
   rename(`UDS 2/3 Autopsy Yes` = `UDS 2/3`, `UDS 3 Autopsy Yes` = `UDS 3`,
          `UDS 2/3 Autopsy Consider` = `UDS 2/31`, `UDS 3 Autopsy Consider` = `UDS 31`,
@@ -196,10 +205,10 @@ uds_rsrch_tbl <- uds_rsrch_tbl %>%
          `UDS 2/3 Blood Yes` = `UDS 2/33`, `UDS 3 Blood Yes` = `UDS 33`)
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## Replace NA values with 0 ----
+## Replace NA values with 0 ---- only necessary when using shiny tables (not DT)
 ###
 # summ_tbl[is.na(summ_tbl)] <- 0
-# total_tbl[is.na(total_tbl)] <- 0
+# uds_vers_tbl[is.na(uds_vers_tbl)] <- 0
 # # demo_tbl[is.na(demo_tbl)] <- 0
 # sex_tbl[is.na(sex_tbl)] <- 0
 # race_tbl[is.na(race_tbl)] <- 0
