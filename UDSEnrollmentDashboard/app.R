@@ -104,7 +104,7 @@ ui <- dashboardPage(
               ),
               fluidRow(
                 box( ## UDS 3 Visit table
-                  width = 6,
+                  width = 4,
                   h3("UDS 3.0 Visits*"),
                   DT::dataTableOutput("uds3_visit"),
                   h6("* 19 participants started at Visit 2")
@@ -195,12 +195,44 @@ ui <- dashboardPage(
       tabItem(tabName = "maps",
               h2("Maps"),
               fluidRow(
-                box(
-                  width = 12,
-                  height = "625px",
-                  plotOutput(outputId = "map_partic_by_county")
-                )
-              ) # end fluid row 1
+                tabBox(
+                  title = "",
+                  id = "map_tabset",
+                  height = "700px",
+                  # width = 12,
+                  side = "left",
+                  tabPanel(
+                    "County",
+                    box(
+                      width = 12,
+                      height = "625px",
+                      plotOutput(outputId = "map_partic_by_county")
+                    )
+                  ), # end tabPanel 1
+                  tabPanel(
+                    "ZIP",
+                    box(
+                      width = 12,
+                      height = "625px",
+                      plotOutput(outputId = "map_partic_by_zip")
+                    )
+                  ) # end tabPanel 2
+                ) # end tabBox
+              ), # end fluid row
+              fluidRow(
+                # box(
+                #   width = 12,
+                #   height = "625px",
+                #   plotOutput(outputId = "map_partic_by_county")
+                # )
+              ), # end fluid row 1
+              fluidRow(
+                # box(
+                #   width = 12,
+                #   height = "625px",
+                #   plotOutput(outputId = "map_partic_by_zip")
+                # )
+              )
       ) ## end tabItem (third)
       
     ) ## end tabItems
@@ -369,7 +401,30 @@ server <- function(input, output) {
       ggtitle(label = "Participant Counts by County", 
               subtitle = "March 2017 to Present")
   }, height = 600)
-}
+
+  ## Participation by ZIP map
+  zip_max <- max(mi_zips_partic_count$Count, na.rm = T)
+  output$map_partic_by_zip <- renderPlot({
+    mi_base_map +
+      geom_point(data = mi_zips_partic_count,
+                 aes(x = longitude, y = latitude, group = zip, 
+                     size = Count,
+                     fill = Count), 
+                 color = "black", pch = 21) +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      nix_lat_long_grid +
+      scale_fill_continuous(low = "#eeeeee", high = "royalblue", 
+                            breaks = seq(1, zip_max, by = 2)) +
+      guides(fill = guide_legend(), size = guide_legend()) +
+      scale_size_continuous(limits = c(1,zip_max), 
+                            breaks = seq(1, zip_max, by = 2)) +
+      ggtitle(label = "Participant Counts by ZIP Code", 
+              subtitle = "March 2017 to Present")
+  }, height = 600)
+  
+} # end server function
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## shiny app ----
