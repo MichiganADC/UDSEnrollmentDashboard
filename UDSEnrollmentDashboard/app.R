@@ -42,7 +42,7 @@ ui <- dashboardPage(
   skin = "blue",
   
   ## Header ----
-  dashboardHeader(title = "UDS Enrollment Dashboard"),
+  dashboardHeader(title = "MADC Dashboard"),
   
   ## Sidebar ----
   dashboardSidebar(
