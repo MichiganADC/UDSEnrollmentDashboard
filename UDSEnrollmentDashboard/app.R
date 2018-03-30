@@ -1,58 +1,61 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## Create dataframe for summary table / stats: 
-##   input:  `summ_tbl`, ...
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# app.R
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## Load libraries ----
-###
+# # # # # 
+## Load libraries ---- 
+
+library(shiny)
 library(shinydashboard)
 library(DT)
 library(ggplot2)
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## Source `report_df_procsd` and helper functions ----
-###
+library(RCurl)
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(forcats)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(zipcode)
 
 operational <- TRUE
-# table_menu_lengths <- c(5, 10, 15)
-dt_options <- list(paging = FALSE,
+dt_options <- list(paging = TRUE,
                    searching = FALSE,
                    ordering = FALSE,
                    info = FALSE)
 
-if (operational) {  ### OPERATIONAL ###
-  source("./report_df_summ_processor.R", local = TRUE)
-  source("./report_df_plots_processor.R", local = TRUE)
-  source("./report_df_maps_processor.R", local = TRUE)
-  source("./plots_helper_fxns.R", local = TRUE)
-} else {            ### DEBUGGING ###
-  source("./UDSEnrollmentDashboard/report_df_summ_processor.R", local = TRUE)
-  source("./UDSEnrollmentDashboard/report_df_plots_processor.R", local = TRUE)
-  source("./UDSEnrollmentDashboard/report_df_maps_processor.R", local = TRUE)
-  source("./UDSEnrollmentDashboard/plots_helper_fxns.R", local = TRUE)
+# # # # #
+## Source files ---- 
+
+if (operational) {
+  source("get_mindset_data.R", local = TRUE)
+  source("build_lst_summ_tbls.R", local = TRUE)
+  source("build_data_plots.R", local = TRUE)
+  source("build_lst_map_dfs.R", local = TRUE)
+} else {
+  source("./UDSEnrollmentDashboard/get_mindset_data.R", local = TRUE)
+  source("./UDSEnrollmentDashboard/build_lst_summ_tbls.R", local = TRUE)
+  source("./UDSEnrollmentDashboard/build_data_plots.R", local = TRUE)
+  source("./UDSEnrollmentDashboard/build_lst_map_dfs.R", local = TRUE)
 }
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## ui ----
-###
-
-ui <- dashboardPage(
-  ## Skin color
-  skin = "blue",
+## ui ---- 
+ui <- dashboardPage( 
+  
+  ## Dashboard skin color
+  skin = "blue", 
   
   ## Header ----
   dashboardHeader(title = "MADC Dashboard"),
   
   ## Sidebar ----
   dashboardSidebar(
-    # Sidebar menu ----
     sidebarMenu(
       menuItem(text = "Summary", tabName = "summary", icon = icon("table")),
       menuItem(text = "Plots", tabName = "plots", icon = icon("signal")),
       menuItem(text = "Maps", tabName = "maps", icon = icon("map"))
-    )
-  ), ## end sidebar
+    ) # end sidebarMenu
+  ), # end dashboardSidebar
   
   ## Body ----
   dashboardBody(
@@ -61,383 +64,328 @@ ui <- dashboardPage(
     tags$style(".fa-tint {color:#064193}"),
     tags$style(".fa-magnet {color:#064193}"),
     
-    ## Tab container ----
+    ## Tab container ---
     tabItems(
-      ## First tab content ---- Summary
-      tabItem(tabName = "summary",
-              h2("Summary"),
-              fluidRow(
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Total"]),
-                         subtitle = "Total Enrolled", icon = icon("dashboard"), color = "navy"),
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "Blood Drawn Yes"]),
-                         subtitle = "Blood Drawn", icon = icon("tint"), color = "navy"),
-                valueBox(value = as.integer(summ_tbl[summ_tbl$uds_dx == "Totals", "MRI Yes"]),
-                         subtitle = "MRI Completed", icon = icon("magnet"), color = "navy")
-              ),
-              fluidRow(
-                box( ## Sex table
-                  width = 12,
-                  h3("Sex"),
-                  # tableOutput("sex")
-                  DT::dataTableOutput("sex")
-                ),
-                box( ## Race table
-                  width = 12,
-                  h3("Race"),
-                  # tableOutput("race")
-                  DT::dataTableOutput("race")
-                )
-              ),
-              fluidRow(
-                box( ## UDS Version table
-                  width = 12,
-                  h3("UDS Version"),
-                  # tableOutput("uds_vers")
-                  DT::dataTableOutput("uds_vers")
-                ),
-                box( ## Research table
-                  width = 12,
-                  h3("Research"),
-                  # tableOutput("research")
-                  DT::dataTableOutput("research")
-                )
-              ),
-              fluidRow(
-                box( ## UDS 3 Visit table
-                  width = 4,
-                  h3("UDS 3.0 Visits*"),
-                  DT::dataTableOutput("uds3_visit"),
-                  h6("* 19 participants started at Visit 2")
-                )
-              ),
-              fluidRow(
-                box( ## Sex x Race table
-                  width = 12,
-                  h3("Sex + Race"),
-                  # tableOutput("sex_race")
-                  DT::dataTableOutput("sex_race")
-                )
-              ),
-              fluidRow(
-                box( ## UDS Version + Research table
-                  width = 12,
-                  h3("UDS Version + Research"),
-                  # tableOutput("uds_research")
-                  DT::dataTableOutput("uds_research")
-                )
+      tabItem( # start tabItem 1 for summary tables
+        tabName = "summary",
+        h2("Summary Tables"),
+        fluidRow( # start fluidRow for valueBoxes
+          # valueBox 1,2,3 here
+        ), # end fluidRow for valueBoxes
+        # fluidRow(
+        #   h2("Example Header 1"),
+        #   DT::dataTableOutput("data_mindset_tbl")
+        # ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("UDS Version"),
+              DT::dataTableOutput("uds_vers"))
+        ), # end fluidRow 
+        fluidRow(
+          box(width = 12,
+              h3("Sex"),
+              DT::dataTableOutput("sex"))
+        ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("Race"),
+              DT::dataTableOutput("race"))
+        ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("Research"),
+              DT::dataTableOutput("rsrch"))
+        ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("Sex + Race"),
+              DT::dataTableOutput("sex_race"))
+        ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("UDS Version + Research"),
+              DT::dataTableOutput("uds_rsrch"))
+        )
+      ), # end tabItem 1 for summary tables
+      tabItem( # start tabItem 2 for plots
+        tabName = "plots",
+        h2("Cumulative Enrollments"),
+        fluidRow(
+          tabBox(
+            title = "Cumulative Enrollments",
+            id = "tabset1",
+            height = "550px",
+            tabPanel(
+              title = "Total",
+              box(width = 12,
+                  plotOutput(outputId = "plot_cum_total"))
+            ), # end tabPanel 1 -- Total plot
+            tabPanel(
+              title = "Sex",
+              box(width = 12,
+                  plotOutput(outputId = "plot_cum_sex"))
+            ), # end tabPanel 2 -- Sex plot
+            tabPanel(
+              title = "Race",
+              box(width = 12,
+                  plotOutput(outputId = "plot_cum_race"))
+            ) # end tabPanel 3 -- Race plot
+          ), # end tabBox 1 for cumulative plots
+          tabBox(
+            title = "Targer Enrollment by Diagnosis",
+            id = "tabset2",
+            height = "550px",
+            side = "right",
+            tabPanel("NL",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_nl"))),
+            tabPanel("MCI",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_mci"))),
+            tabPanel("LBD",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_lbd"))),
+            tabPanel("FTD",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_ftd"))),
+            tabPanel("AD",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_ad")))
+          ) # end tabBox 2 for target diagnosis plots
+        ), # end fluidRow for plots
+        fluidRow(
+          box( # start box 1 for date range input (cumulative)
+            width = 6,
+            dateRangeInput(inputId = "dateRange1",
+                           label = "Date range input: yyyy-mm-dd",
+                           start = as.Date("2017-03-01"), end = Sys.Date())
+          ), 
+          box( # start box 2 for date range input (diagnosis)
+            width = 6,
+            dateRangeInput(inputId = "dateRange2",
+                           label = "Date range input: yyyy-mm-dd",
+                           start = as.Date("2017-03-01"),
+                           end = as.Date("2022-03-01")
+            )
+          )
+        ) # end fluidRow for interactive dates
+      ), # end tabItem 2 for plots
+      tabItem( # start tabItem 3 for maps
+        tabName = "maps",
+        h2("Maps"),
+        fluidRow(
+          tabBox(
+            title = "",
+            id = "map_tabset",
+            height = "700px",
+            side = "left",
+            tabPanel(
+              title = "County",
+              box(
+                width = 12,
+                height = "625px",
+                plotOutput(outputId = "map_partic_by_county")
               )
-      ), ## end tabItem (first)
-      
-      ## Second tab content ---- Plots
-      tabItem(tabName = "plots",
-              h2("Cumulative Enrollment"),
-              fluidRow(
-                tabBox(
-                  title = "Cumulative Enrollment",
-                  id = "tabset1", 
-                  height = "550px",
-                  tabPanel("Total",
-                           box(width = 12, 
-                               plotOutput(outputId = "plot_cum_total"))),
-                  tabPanel("Sex", 
-                           box(width = 12, 
-                               plotOutput(outputId = "plot_cum_sex"))),
-                  tabPanel("Race", 
-                           box(width = 12, 
-                               plotOutput(outputId = "plot_cum_race")))
-                ),
-                tabBox(
-                  title = "Target Enrollment by Diagnosis",
-                  id = "tabset2",
-                  height = "550px",
-                  side = "right", 
-                  tabPanel("NL",
-                           box(width = 12,
-                               plotOutput(outputId = "plot_cum_dx_target_nl"))),
-                  tabPanel("MCI",
-                           box(width = 12,
-                               plotOutput(outputId = "plot_cum_dx_target_mci"))),
-                  tabPanel("LBD",
-                           box(width = 12,
-                               plotOutput(outputId = "plot_cum_dx_target_lbd"))), 
-                  tabPanel("FTD",
-                           box(width = 12,
-                               plotOutput(outputId = "plot_cum_dx_target_ftd"))),
-                  tabPanel("AD",
-                           box(width = 12,
-                               plotOutput(outputId = "plot_cum_dx_target_ad")))
-                )
-              ), # end fluid row 1
-              fluidRow(
-                box(
-                  width = 6,
-                  # Date range input ----
-                  dateRangeInput(inputId = "dateRange1",
-                                 label = "Date range input: yyyy-mm-dd",
-                                 start = as.Date("2017-03-01"), end = Sys.Date()
-                  ) #,
-                  # verbatimTextOutput("dateRange1Text1"),
-                  # verbatimTextOutput("dateRange1Text2")
-                ),
-                box(
-                  width = 6,
-                  # Date range input ----
-                  dateRangeInput(inputId = "dateRange2",
-                                 label = "Date range input: yyyy-mm-dd",
-                                 start = as.Date("2017-03-01"), end = as.Date("2022-03-01")
-                  ) #,
-                  # verbatimTextOutput("dateRange2Text1"),
-                  # verbatimTextOutput("dateRange2Text2")
-                )
-              ) # end fluid row 2
-      ), ## end tabItem (second)
-      
-      tabItem(tabName = "maps",
-              h2("Maps"),
-              fluidRow(
-                tabBox(
-                  title = "",
-                  id = "map_tabset",
-                  height = "700px",
-                  # width = 12,
-                  side = "left",
-                  tabPanel(
-                    "County",
-                    box(
-                      width = 12,
-                      height = "625px",
-                      plotOutput(outputId = "map_partic_by_county")
-                    )
-                  ), # end tabPanel 1
-                  tabPanel(
-                    "ZIP",
-                    box(
-                      width = 12,
-                      height = "625px",
-                      plotOutput(outputId = "map_partic_by_zip")
-                    )
-                  ) # end tabPanel 2
-                ) # end tabBox
-              ), # end fluid row
-              fluidRow(
-                # box(
-                #   width = 12,
-                #   height = "625px",
-                #   plotOutput(outputId = "map_partic_by_county")
-                # )
-              ), # end fluid row 1
-              fluidRow(
-                # box(
-                #   width = 12,
-                #   height = "625px",
-                #   plotOutput(outputId = "map_partic_by_zip")
-                # )
+            ), # end tabPanel 1 -- county map
+            tabPanel(
+              title = "ZIP",
+              box(
+                width = 12,
+                height = "625px",
+                plotOutput(outputId = "map_partic_by_zip")
               )
-      ) ## end tabItem (third)
-      
-    ) ## end tabItems
-  ) ## end dashboardBody
-) ## end dashboardPage
+            ) # end tabPanel 2 -- ZIP map
+          ) # end tabBox
+        ) # end fluidRow
+      ) # end tabItem 3 for maps
+    ) # end tabItems
+  ) # end dashboardBody
+) # end dashboardPage
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## server ----
-###
-
-server <- function(input, output) {
-
-  # ## NOT USEFUL -- Summary table output ----
-  # output$summary <- renderTable({
-  #   summ_tbl
+server <- function(input, output, session) {
+  
+  invalidation_time <- 1000 * 60 * 60 * 24 # 24-hour refresh
+  #                    ^      ^    ^    ^
+  #                    |      |    |    |> 24 hr / day
+  #                    |      |    |> 60 min / hr
+  #                    |      |> 60 sec / min
+  #                    |> 1000 ms / sec
+  # invalidation_time <- 1000 * 60 * 5 # 5-minute refresh (debug)
+  
+  # # # # # 
+  # Get data ----
+  
+  ## Reactive df for core data
+  data_mindset_rctv <- reactive({
+    invalidateLater(invalidation_time, session) 
+    get_data_mindset() # source: etl_mindset_uds2.R
+  })
+  
+  ## List for summary tables
+  lst_summ_tbls <- reactive({
+    invalidateLater(invalidation_time, session)
+    build_lst_summ_tbls( data_mindset_rctv() )
+  })
+  # lst_summ_tbls <- build_lst_summ_tbls( data_mindset_rctv() ) # no workee
+  
+  ## df for plots
+  data_plots <- reactive({
+    invalidateLater(invalidation_time, session)
+    build_data_plots( data_mindset_rctv() )
+  })
+  
+  ## List for maps
+  lst_map_dfs <- reactive({
+    invalidateLater(invalidation_time, session)
+    build_lst_map_dfs( data_mindset_rctv() )
+  })
+  
+  # # # # # 
+  # Render tables ----
+  
+  # Use `observe` + `lapply` to render all the summary tables
+  summ_tbl_names <- c("uds_vers", "sex", "race", 
+                      "sex_race", "rsrch", "uds_rsrch")
+  observe({
+    lapply(summ_tbl_names, function(tbl_name) {
+      output[[tbl_name]] <- DT::renderDataTable({
+        DT::datatable( lst_summ_tbls()[[paste0(tbl_name, "_tbl")]], 
+                       options = dt_options )
+      })
+    }) # end `lapply`
+  }) # end `observe`
+  
+  # output$data_mindset_tbl <- DT::renderDataTable({ 
+  #   DT::datatable( data_mindset_rctv(), options = dt_options ) 
   # })
   
-  ## Sex table output ----
-  # output$sex <- renderTable({ sex_tbl })
-  output$sex <- DT::renderDataTable({
-    DT::datatable(sex_tbl, options = dt_options)
-  })
+  # # # # # 
+  ## Render plots ----
   
-  ## Race table output ----
-  # output$race <- renderTable({ race_tbl })
-  output$race <- DT::renderDataTable({
-    DT::datatable(race_tbl, options = dt_options)
-  })
-  
-  ## UDS Version table output ----
-  # output$uds_vers <- renderTable({ uds_vers_tbl })
-  output$uds_vers <- DT::renderDataTable({
-    DT::datatable(uds_vers_tbl, options = dt_options)
-  })
-  
-  ## Research table output ----
-  # output$research <- renderTable({ rsrch_tbl })
-  output$research <- DT::renderDataTable({
-    DT::datatable(rsrch_tbl, options = dt_options)
-  })
-  
-  ## UDS 3.0 Visit table output
-  # output$uds3_visit <- renderTable({ uds3_visit_tbl })
-  output$uds3_visit <- DT::renderDataTable({
-    DT::datatable(uds3_visit_tbl, options = dt_options)
-  })
-  
-  ## Sex x Race table output ----
-  # output$sex_race <- renderTable({ sex_race_tbl })
-  output$sex_race <- DT::renderDataTable({
-    DT::datatable(sex_race_tbl, options = dt_options)
-  })
-  
-  ## UDS Version + Autopsy output ----
-  # output$uds_autopsy <- renderTable({ uds_autopsy_tbl })
-  output$uds_research <- DT::renderDataTable({
-    DT::datatable(uds_rsrch_tbl, options = dt_options)
-  })
-  
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-  
-  ## Cumulative enrollment totals ----
+  ## Cumulative enrollment totals plot
   output$plot_cum_total <- renderPlot({
-    cum_plot(df = report_df_plots, 
-             x = "exam_date", y = "total_cum_sum", 
+    cum_plot(df = data_plots(),
+             x = "exam_date", y = "total_cum_sum",
              plot_title = "Total Participants Over Time",
-             start_date = as.Date(input$dateRange1[1]), 
+             start_date = as.Date(input$dateRange1[1]),
              end_date = as.Date(input$dateRange1[2]))
   })
   
-  # ## NOT USEFUL -- Cumulative enrollment by diagnosis plot ----
-  # output$plot_cum_dx <- renderPlot({
-  #   cum_plot_single_grp(df = report_df_plots,
-  #                       x = "exam_date", y = "dx_cum_sum",
-  #                       group_var = "uds_dx",
-  #                       plot_title = "Participants Over Time by Diagnosis")
-  # })
-  
-  ## Cumulative enrollment by sex plot ----
+  ## Cumulative enrollment by sex plot
   output$plot_cum_sex <- renderPlot({
-    cum_plot_single_grp(df = report_df_plots, 
-                        x = "exam_date", y = "sex_cum_sum", 
+    cum_plot_single_grp(df = data_plots(),
+                        x = "exam_date", y = "sex_cum_sum",
                         group_var = "sex_value",
                         plot_title = "Participants Over Time by Sex",
-                        start_date = as.Date(input$dateRange1[1]), 
+                        start_date = as.Date(input$dateRange1[1]),
                         end_date = as.Date(input$dateRange1[2]))
   })
   
-  ## Cumulative enrollment by race plot ----
+  ## Cumulative enrollment by race plot
   output$plot_cum_race <- renderPlot({
-    cum_plot_single_grp(df = report_df_plots,
+    cum_plot_single_grp(df = data_plots(),
                         x = "exam_date", y = "race_cum_sum",
                         group_var = "race_value",
                         plot_title = "Participants Over Time by Race",
-                        start_date = as.Date(input$dateRange1[1]), 
+                        start_date = as.Date(input$dateRange1[1]),
                         end_date = as.Date(input$dateRange1[2]))
   })
   
-  ## Cumulative enrollment target: AD ----
-  output$plot_cum_dx_target_ad <- renderPlot({
-    cum_plot_dx_target_dx(df = report_df_plots,
-                          x = "exam_date", y = "dx_cum_sum",
-                          group_var = "uds_dx",
-                          dx = "AD", dx_target = "AD target",
-                          plot_title = "AD vs. AD Target",
-                          start_date = as.Date(input$dateRange2[1]), 
-                          end_date = as.Date(input$dateRange2[2]))
-  })
+  ## Cumulative enrollment by diagnosis vs. diagnosis targets
+  # Use `observe` + `lapply` to render all the target diagnosis plots
+  diagnosis_abbrevs <- c("AD", "FTD", "LBD", "MCI", "NL")
+  observe({
+    lapply(diagnosis_abbrevs, function(dx_abrv) {
+      output[[paste0("plot_cum_dx_target_", tolower(dx_abrv))]] <-
+        renderPlot({
+          cum_plot_dx_target_dx(df = data_plots(),
+                                x = "exam_date", y = "dx_cum_sum",
+                                group_var = "uds_dx",
+                                dx = dx_abrv, 
+                                dx_target = paste0(dx_abrv, " target"),
+                                plot_title = paste0(dx_abrv, " vs. ", 
+                                                    dx_abrv, " Target"),
+                                start_date = as.Date(input$dateRange2[1]),
+                                end_date = as.Date(input$dateRange2[2]))
+        }) # end renderPlot
+    }) # end lapply
+  }) # end observe
   
-  ## Cumulative enrollment target: FTD ----
-  output$plot_cum_dx_target_ftd <- renderPlot({
-    cum_plot_dx_target_dx(df = report_df_plots,
-                          x = "exam_date", y = "dx_cum_sum",
-                          group_var = "uds_dx",
-                          dx = "FTD", dx_target = "FTD target",
-                          plot_title = "FTD vs. FTD Target",
-                          start_date = as.Date(input$dateRange2[1]), 
-                          end_date = as.Date(input$dateRange2[2]))
-  })
+  # # # # # 
+  # Render maps ----
   
-  ## Cumulative enrollment target: LBD ----
-  output$plot_cum_dx_target_lbd <- renderPlot({
-    cum_plot_dx_target_dx(df = report_df_plots,
-                          x = "exam_date", y = "dx_cum_sum",
-                          group_var = "uds_dx",
-                          dx = "LBD", dx_target = "LBD target",
-                          plot_title = "LBD vs. LBD Target",
-                          start_date = as.Date(input$dateRange2[1]), 
-                          end_date = as.Date(input$dateRange2[2]))
-  })
+  # ## Condense theme
+  # nix_lat_long_grid <- theme(
+  #   axis.text = element_blank(),
+  #   axis.line = element_blank(),
+  #   axis.ticks = element_blank(),
+  #   panel.border = element_blank(),
+  #   panel.grid = element_blank(),
+  #   axis.title = element_blank()
+  # )
   
-  ## Cumulative enrollment target: MCI ----
-  output$plot_cum_dx_target_mci <- renderPlot({
-    cum_plot_dx_target_dx(df = report_df_plots,
-                          x = "exam_date", y = "dx_cum_sum",
-                          group_var = "uds_dx",
-                          dx = "MCI", dx_target = "MCI target",
-                          plot_title = "MCI vs. MCI Target",
-                          start_date = as.Date(input$dateRange2[1]), 
-                          end_date = as.Date(input$dateRange2[2]))
+  ## Participation by county map
+  county_max <- reactive({
+    max(lst_map_dfs()$map_df_partic_ct_mi_county$Count, na.rm = TRUE)
   })
-  
-  ## Cumulative enrollment target: NL ----
-  output$plot_cum_dx_target_nl <- renderPlot({
-    cum_plot_dx_target_dx(df = report_df_plots,
-                          x = "exam_date", y = "dx_cum_sum",
-                          group_var = "uds_dx",
-                          dx = "NL", dx_target = "NL target",
-                          plot_title = "NL vs. NL Target",
-                          start_date = as.Date(input$dateRange2[1]), 
-                          end_date = as.Date(input$dateRange2[2]))
-  })
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-  
-  ## Participation by County map
   output$map_partic_by_county <- renderPlot({
-    mi_base_map +
-      geom_polygon(data = mi_counties_partic_count, aes(fill = Count),
+    lst_map_dfs()$mi_base_map +
+      geom_polygon(data = lst_map_dfs()$map_df_partic_ct_mi_county,
+                   aes(fill = Count),
                    color = "black", size = 0.1) +
       geom_polygon(color = "black", fill = NA) +
       theme_bw() +
-      nix_lat_long_grid +
-      scale_fill_gradient(low = "#FFFFFF", high = "darkblue",
-                          breaks = c(1, 20, 40, 60, 80, 100)) +
-      ggtitle(label = "Participant Counts by County", 
-              subtitle = "March 2017 to Present")
-  }, height = 600)
-
-  ## Participation by ZIP map
-  zip_max <- max(mi_zips_partic_count$Count, na.rm = T)
-  output$map_partic_by_zip <- renderPlot({
-    mi_base_map +
-      geom_point(data = mi_zips_partic_count,
-                 aes(x = longitude, y = latitude, group = zip, 
-                     size = Count,
-                     fill = Count), 
-                 color = "black", pch = 21) +
-      geom_polygon(color = "black", fill = NA) +
-      theme_bw() +
-      nix_lat_long_grid +
-      scale_fill_continuous(low = "#eeeeee", high = "royalblue", 
-                            breaks = seq(1, zip_max, by = 2)) +
-      guides(fill = guide_legend(), size = guide_legend()) +
-      scale_size_continuous(limits = c(1,zip_max), 
-                            breaks = seq(1, zip_max, by = 2)) +
-      ggtitle(label = "Participant Counts by ZIP Code", 
+      theme(
+        axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank()
+      ) +
+      scale_fill_continuous(low = "#eeeeee", high = "royalblue",
+                            breaks = seq(1, county_max(),
+                                         by = (county_max()-1)/5)) +
+      ggtitle(label = "Participant Counts by County",
               subtitle = "March 2017 to Present")
   }, height = 600)
   
-} # end server function
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-## shiny app ----
-###
+  # ## Participation by ZIP map
+  zip_max <- reactive({
+    max(lst_map_dfs()$map_df_partic_ct_mi_zip$Count, na.rm = TRUE)
+  })
+  output$map_partic_by_zip <- renderPlot({
+    lst_map_dfs()$mi_base_map +
+      geom_point(data = lst_map_dfs()$map_df_partic_ct_mi_zip,
+                 aes(x = longitude, y = latitude, group = zip,
+                     size = Count,
+                     fill = Count),
+                 color = "black", pch = 21) +
+      geom_polygon(color = "black", fill = NA) +
+      theme_bw() +
+      theme(
+        axis.text = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        panel.border = element_blank(),
+        panel.grid = element_blank(),
+        axis.title = element_blank()
+      ) +
+      scale_fill_continuous(low = "#eeeeee", high = "royalblue",
+                            breaks = seq(1, zip_max(), 
+                                         by = round((zip_max()-1)/5))) +
+      guides(fill = guide_legend(), size = guide_legend()) +
+      scale_size_continuous(limits = c(1, zip_max()),
+                            breaks = seq(1, zip_max(),
+                                         by = round((zip_max()-1)/5))) +
+      ggtitle(label = "Participant Counts by ZIP Code",
+              subtitle = "March 2017 to Present")
+  }, height = 600)
+  
+}
 
 shinyApp(ui, server)
 
 
 
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
