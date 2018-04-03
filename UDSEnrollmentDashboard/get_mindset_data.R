@@ -8,7 +8,7 @@ if (operational) {
 
 get_data_mindset <- function() {
   
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # # 
   ## Retrieve data from REDCap API ----
   
   ## Retrieve MiNDSET Registrty 3/2017 data from R/C API
@@ -54,7 +54,7 @@ get_data_mindset <- function() {
   ## Copy df_mindset
   # df_mindset_xfrm <- df_mindset # build / debug
   
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # #  
   ## Define factor levels ----
   ##   1. redcap_event_name_levels
   ##   2. dx_levels
@@ -82,7 +82,7 @@ get_data_mindset <- function() {
   ## 4. sex_levels
   sex_levels <- c("Female", "Male")
 
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # # 
   ## Mutate fields (if nec.); Coerce fields to appropriate classes ----
 
   ## Coerce `redcap_event_name` to factor class
@@ -192,14 +192,14 @@ get_data_mindset <- function() {
   df_mindset_xfrm <- df_mindset_xfrm %>%
     dplyr::filter(!duplicated_subject_ids)
   
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # # 
   ## Process `df_uds2_id`` ----
   ## ... add a simple `uds_version` character column
   ###
   df_uds2_id <- df_uds2_id %>% 
     dplyr::mutate(uds_version = "UDS 2/3")
   
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # # 
   ## Left join `df_mindset_xfrm`` and `df_uds2_id` ----
   ###
   df_mindset_xfrm <- df_mindset_xfrm %>% 
@@ -207,7 +207,7 @@ get_data_mindset <- function() {
     dplyr::mutate(uds_version = 
                     ifelse(is.na(uds_version), "UDS 3", uds_version))
   
-  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  # # # # # 
   ## Return xformed MiNDSET data ----
   return(df_mindset_xfrm)
 }

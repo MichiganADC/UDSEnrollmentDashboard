@@ -1,18 +1,15 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Helper functions for building UDS report summary table
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # 
 ## Load libraries ----
-###
+
 library(dplyr)
 library(tidyr)
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# # # # # 
 ## Define helper functions ----
-###
 
-# Fxn for outputting tables with one group variable
+## Fxn for outputting tables with one group variable
 single_grp_table <- function(x, group_var) {
   distinct_grp_vals <- distinct(x, !!group_var)
   x %>% 
@@ -22,7 +19,7 @@ single_grp_table <- function(x, group_var) {
     arrange(!!group_var)
 }
 
-# Fxn for outputting tables with one group variable and one filter variable
+## Fxn for outputting tables with one group variable and one filter variable
 single_grp_filter_table <- function(x, group_var, 
                                     filter_var, filter_var_string) {
   distinct_grp_vals <- distinct(x, !!group_var)
@@ -34,7 +31,7 @@ single_grp_filter_table <- function(x, group_var,
     arrange(!!group_var)
 }
 
-# Fxn for outputting tables with two group variables
+## Fxn for outputting tables with two group variables
 double_grp_table <- function(x, group_var_1, group_var_2) {
   distinct_grp_vals <- distinct(x, !!group_var_1)
   x %>% 
@@ -45,7 +42,7 @@ double_grp_table <- function(x, group_var_1, group_var_2) {
     arrange(!!group_var_1)
 }
 
-# Fxn for outputting tables with two group variables and one filter variable
+## Fxn for outputting tables with two group variables and one filter variable
 double_grp_filter_table <- function(x, group_var_1, group_var_2, 
                                     filter_var, filter_var_string) {
   distinct_grp_vals <- distinct(x, !!group_var_1)
@@ -58,7 +55,7 @@ double_grp_filter_table <- function(x, group_var_1, group_var_2,
     arrange(!!group_var_1)
 }
 
-# Fxn for outputting tables with three group variables
+## Fxn for outputting tables with three group variables
 triple_grp_table <- function(x, group_var_1, group_var_2, group_var_3) {
   distinct_grp_vals <- distinct(x, !!group_var_1)
   x %>% 
@@ -70,7 +67,7 @@ triple_grp_table <- function(x, group_var_1, group_var_2, group_var_3) {
     arrange(!!group_var_1)
 }
 
-# Fxn for outputting tables with two group variables and one filter variable
+## Fxn for outputting tables with two group variables and one filter variable
 triple_grp_filter_table <- function(x, group_var_1, group_var_2, group_var_3, 
                                     filter_var, filter_var_string) {
   distinct_grp_vals <- distinct(x, !!group_var_1)
@@ -82,6 +79,7 @@ triple_grp_filter_table <- function(x, group_var_1, group_var_2, group_var_3,
     arrange(!!group_var_1)
 }
 
+## Fxn to append 'totals' row to the bottom of a data frame (table) 
 add_totals_row <- function(data_tbl) {
   totals <- vapply(X = data_tbl[, 2:ncol(data_tbl)],
                    FUN = sum, na.rm = TRUE,
@@ -97,6 +95,7 @@ add_totals_row <- function(data_tbl) {
   return(data_tbl)
 }
 
+## Fxn to append 'proportions' row to the bottom of a data frame (table) 
 add_proportions_row <- function(data_tbl) {
   # pt_sum <- as.integer(data_tbl[data_tbl$uds_dx == "Totals", "Total"])
   pt_sum <- data_tbl %>% 
@@ -120,9 +119,3 @@ add_proportions_row <- function(data_tbl) {
 
 
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

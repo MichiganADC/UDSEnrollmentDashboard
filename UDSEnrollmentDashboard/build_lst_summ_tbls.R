@@ -19,51 +19,60 @@ build_lst_summ_tbls <- function(data) {
   lst_summ_cts$total_cts <- 
     single_grp_table(data, 
                      group_var = quo(uds_dx))
+  
   # UDS Version counts 
   lst_summ_cts$uds_vers_cts <-
     double_grp_table(data,
                      group_var_1 = quo(uds_dx),
                      group_var_2 = quo(uds_version))
+  
   # Demographic: Sex counts
   lst_summ_cts$sex_cts <-
     double_grp_table(data,
                      group_var_1 = quo(uds_dx),
                      group_var_2 = quo(sex_value))
+  
   # Demographic: Race counts
   lst_summ_cts$race_cts <-
     double_grp_table(data,
                      group_var_1 = quo(uds_dx),
                      group_var_2 = quo(race_value))
+  
   # Demographic: Sex + Race counts
   lst_summ_cts$sex_race_cts <-
     triple_grp_table(data,
                      group_var_1 = quo(uds_dx),
                      group_var_2 = quo(sex_value),
                      group_var_3 = quo(race_value))
+  
   # Research: Autopsy Consent Yes counts
   lst_summ_cts$autopsy_yes_cts <-
     single_grp_filter_table(data,
                             group_var = quo(uds_dx),
                             filter_var = quo(consent_to_autopsy),
                             filter_var_string = "Yes")
+  
   # Research: Autopsy Consent Considering counts
   lst_summ_cts$autopsy_consid_cts <-
     single_grp_filter_table(data,
                             group_var = quo(uds_dx),
                             filter_var = quo(consent_to_autopsy),
                             filter_var_string = "Considering")
+  
   # Research: MRI Yes counts
   lst_summ_cts$mri_yes_cts <-
     single_grp_filter_table(data,
                             group_var = quo(uds_dx),
                             filter_var = quo(mri_completed),
                             filter_var_string = "1. Yes")
+  
   # Research: Blood Drawn Yes counts
   lst_summ_cts$blood_yes_cts <-
     single_grp_filter_table(data,
                             group_var = quo(uds_dx),
                             filter_var = quo(blood_drawn),
                             filter_var_string = "1. Yes")
+  
   # UDS Version + Research: Autopsy Yes counts
   lst_summ_cts$uds_autopsy_yes_cts <-
     double_grp_filter_table(data,
@@ -71,6 +80,7 @@ build_lst_summ_tbls <- function(data) {
                             group_var_2 = quo(uds_version),
                             filter_var = quo(consent_to_autopsy),
                             filter_var_string = "Yes")
+  
   # UDS Version + Research: Autopsy Consdiering counts
   lst_summ_cts$uds_autopsy_consid_cts <-
     double_grp_filter_table(data,
@@ -78,6 +88,7 @@ build_lst_summ_tbls <- function(data) {
                             group_var_2 = quo(uds_version),
                             filter_var = quo(consent_to_autopsy),
                             filter_var_string = "Considering")
+  
   # UDS Version + Research: MRI Yes counts
   lst_summ_cts$uds_mri_yes_cts <-
     double_grp_filter_table(data,
@@ -85,6 +96,7 @@ build_lst_summ_tbls <- function(data) {
                             group_var_2 = quo(uds_version),
                             filter_var = quo(mri_completed),
                             filter_var_string = "1. Yes")
+  
   # UDS Version + Research: Blood Drawn Yes counts
   lst_summ_cts$uds_blood_yes_cts <-
     double_grp_filter_table(data,
@@ -101,21 +113,25 @@ build_lst_summ_tbls <- function(data) {
     bind_cols(lst_summ_cts$total_cts, 
               lst_summ_cts$uds_vers_cts[, -1]) %>% 
     arrange(tolower(uds_dx))
+  
   # Sex table
   lst_summ_tbls$sex_tbl <- 
     bind_cols(lst_summ_cts$total_cts, 
               lst_summ_cts$sex_cts[, -1]) %>% 
     arrange(tolower(uds_dx))
+  
   # Race table
   lst_summ_tbls$race_tbl <- 
     bind_cols(lst_summ_cts$total_cts, 
               lst_summ_cts$race_cts[, -1]) %>% 
     arrange(tolower(uds_dx))
+  
   # Sex + Race table
   lst_summ_tbls$sex_race_tbl <-
     bind_cols(lst_summ_cts$total_cts, 
               lst_summ_cts$sex_race_cts[, -1]) %>% 
     arrange(tolower(uds_dx))
+  
   # Research table
   lst_summ_tbls$rsrch_tbl <- 
     bind_cols(lst_summ_cts$total_cts, 
@@ -124,6 +140,7 @@ build_lst_summ_tbls <- function(data) {
               lst_summ_cts$mri_yes_cts[, -1], 
               lst_summ_cts$blood_yes_cts[, -1]) %>% 
     arrange(tolower(uds_dx))
+  
   # UDS Version + Research table
   lst_summ_tbls$uds_rsrch_tbl <-
     bind_cols(lst_summ_cts$total_cts, 

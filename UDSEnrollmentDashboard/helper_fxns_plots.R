@@ -1,6 +1,4 @@
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 ## Helper functions for plots
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 # # # # # 
 ## Define helper functions ----
@@ -34,7 +32,8 @@ cum_plot <- function(df, x, y, plot_title, start_date, end_date) {
 }
 
 ## Fxn for cumulative plot with single group
-cum_plot_single_grp <- function(df, x, y, group_var, plot_title, start_date, end_date) {
+cum_plot_single_grp <- function(df, x, y, group_var, 
+                                plot_title, start_date, end_date) {
   df %>% 
     filter(!stringr::str_detect(uds_dx, "target")) %>% 
     ggplot(data = ., 
@@ -54,14 +53,20 @@ cum_plot_single_grp <- function(df, x, y, group_var, plot_title, start_date, end
 }
 
 ## Fxn for cumulative plot with dx vs. dx target
-cum_plot_dx_target_dx <- function(df, x, y, group_var, dx, dx_target, plot_title, start_date, end_date) {
+cum_plot_dx_target_dx <- function(df, x, y, group_var, 
+                                  dx, dx_target, 
+                                  plot_title, start_date, end_date) {
   df %>% 
     filter(uds_dx == dx | uds_dx == dx_target) %>% 
     ggplot(data = ., 
            aes_string(x = x, y = y, 
-                      group = group_var, color = group_var, linetype = group_var)) +
+                      group = group_var, 
+                      color = group_var, 
+                      linetype = group_var)) +
     geom_line(size = cstm_line_size) +
-    geom_vline(xintercept = Sys.Date(), color = "darkgrey", linetype = "longdash") +
+    geom_vline(xintercept = Sys.Date(), 
+               color = "darkgrey", 
+               linetype = "longdash") +
     scale_x_date(name = "Visit Date",
                  date_labels = "%b %y",
                  date_breaks = "6 months",
@@ -97,9 +102,3 @@ add_dx_target_rows <- function(df, dx, dx_target, annual_targets) {
 
 
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # #     EXTRA  SPACE    # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

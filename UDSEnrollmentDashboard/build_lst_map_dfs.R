@@ -6,16 +6,6 @@ if (operational) {
   load("./UDSEnrollmentDashboard/mi_counties_list.Rdata")
 }
 
-# ## Condense theme
-# nix_lat_long_grid <- theme(
-#   axis.text = element_blank(),
-#   axis.line = element_blank(),
-#   axis.ticks = element_blank(),
-#   panel.border = element_blank(),
-#   panel.grid = element_blank(),
-#   axis.title = element_blank()
-# )
-
 build_lst_map_dfs <- function(data) {
   
   # # # # # 

@@ -19,7 +19,7 @@ library(mapdata)
 library(zipcode)
 
 operational <- TRUE
-dt_options <- list(paging = TRUE,
+dt_options <- list(paging = FALSE,
                    searching = FALSE,
                    ordering = FALSE,
                    info = FALSE)
@@ -72,10 +72,6 @@ ui <- dashboardPage(
         fluidRow( # start fluidRow for valueBoxes
           # valueBox 1,2,3 here
         ), # end fluidRow for valueBoxes
-        # fluidRow(
-        #   h2("Example Header 1"),
-        #   DT::dataTableOutput("data_mindset_tbl")
-        # ), # end fluidRow
         fluidRow(
           box(width = 12,
               h3("UDS Version"),
@@ -213,7 +209,7 @@ server <- function(input, output, session) {
   # invalidation_time <- 1000 * 60 * 5 # 5-minute refresh (debug)
   
   # # # # # 
-  # Get data ----
+  ## Get data ----
   
   ## Reactive df for core data
   data_mindset_rctv <- reactive({
@@ -226,8 +222,7 @@ server <- function(input, output, session) {
     invalidateLater(invalidation_time, session)
     build_lst_summ_tbls( data_mindset_rctv() )
   })
-  # lst_summ_tbls <- build_lst_summ_tbls( data_mindset_rctv() ) # no workee
-  
+
   ## df for plots
   data_plots <- reactive({
     invalidateLater(invalidation_time, session)
@@ -241,9 +236,9 @@ server <- function(input, output, session) {
   })
   
   # # # # # 
-  # Render tables ----
+  ## Render tables ----
   
-  # Use `observe` + `lapply` to render all the summary tables
+  ## Use `observe` + `lapply` to render all the summary tables
   summ_tbl_names <- c("uds_vers", "sex", "race", 
                       "sex_race", "rsrch", "uds_rsrch")
   observe({
@@ -255,6 +250,7 @@ server <- function(input, output, session) {
     }) # end `lapply`
   }) # end `observe`
   
+  ## Example of a single table render
   # output$data_mindset_tbl <- DT::renderDataTable({ 
   #   DT::datatable( data_mindset_rctv(), options = dt_options ) 
   # })
@@ -312,17 +308,7 @@ server <- function(input, output, session) {
   }) # end observe
   
   # # # # # 
-  # Render maps ----
-  
-  # ## Condense theme
-  # nix_lat_long_grid <- theme(
-  #   axis.text = element_blank(),
-  #   axis.line = element_blank(),
-  #   axis.ticks = element_blank(),
-  #   panel.border = element_blank(),
-  #   panel.grid = element_blank(),
-  #   axis.title = element_blank()
-  # )
+  ## Render maps ----
   
   ## Participation by county map
   county_max <- reactive({
