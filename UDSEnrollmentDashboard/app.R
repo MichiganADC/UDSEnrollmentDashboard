@@ -3,6 +3,17 @@
 # # # # # 
 ## Load libraries ---- 
 
+package.list <- c("shiny", "shinydashboard", "DT", "ggplot2", "RCurl", 
+                  "jsonlite", "dplyr", "tidyr", "lubridate", "forcats",
+                  "ggmap", "maps", "mapdata", "zipcode")
+new.package.list <- 
+  package.list[!(package.list %in% installed.packages()[, "Package"])]
+if (length(new.package.list)) { 
+  install.packages(new.package.list,
+                   repos = "https://cloud.r-project.org/",
+                   verbose = TRUE) 
+  }
+
 library(shiny)
 library(shinydashboard)
 library(DT)
@@ -101,7 +112,12 @@ ui <- dashboardPage(
           box(width = 12,
               h3("UDS Version + Research"),
               DT::dataTableOutput("uds_rsrch"))
-        )
+        ), # end fluidRow
+        fluidRow(
+          box(width = 12,
+              h3("Race + MRI Yes"),
+              DT::dataTableOutput("race_mri_yes"))
+        ) # end fluidRow
       ), # end tabItem 1 for summary tables
       tabItem( # start tabItem 2 for plots
         tabName = "plots",
@@ -239,8 +255,8 @@ server <- function(input, output, session) {
   ## Render tables ----
   
   ## Use `observe` + `lapply` to render all the summary tables
-  summ_tbl_names <- c("uds_vers", "sex", "race", 
-                      "sex_race", "rsrch", "uds_rsrch")
+  summ_tbl_names <- c("uds_vers", "sex", "race", "sex_race", 
+                      "rsrch", "uds_rsrch", "race_mri_yes")
   observe({
     lapply(summ_tbl_names, function(tbl_name) {
       output[[tbl_name]] <- DT::renderDataTable({

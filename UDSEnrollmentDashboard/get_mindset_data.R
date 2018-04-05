@@ -187,7 +187,7 @@ get_data_mindset <- function() {
   df_mindset_xfrm <- df_mindset_xfrm %>%
     dplyr::arrange(subject_id, exam_date)
 
-  ## Clean out duplicate visits
+  ## Clean out duplicate visits ... keeping oldest visit
   duplicated_subject_ids <- duplicated(df_mindset_xfrm$subject_id)
   df_mindset_xfrm <- df_mindset_xfrm %>%
     dplyr::filter(!duplicated_subject_ids)
