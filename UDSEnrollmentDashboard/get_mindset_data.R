@@ -26,7 +26,8 @@ get_data_mindset <- function() {
         rawOrLabelHeaders = 'label',
         exportCheckboxLabel = 'false',
         returnFormat = 'json',
-        .opts = list(ssl.verifypeer = TRUE, verbose = TRUE)
+        # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # can't use now*
+        .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
       )
     ) %>% 
     dplyr::select(-pt_deceased, -withdrew_date)
@@ -45,7 +46,8 @@ get_data_mindset <- function() {
         rawOrLabelHeaders = 'label',
         exportCheckboxLabel = 'false',
         returnFormat = 'json',
-        .opts = list(ssl.verifypeer = TRUE, verbose = TRUE)
+        # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # can't use now*
+        .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
       )
     ) %>% 
     dplyr::select(subject_id) # only keep `subject_id` column
@@ -211,6 +213,10 @@ get_data_mindset <- function() {
   ## Return xformed MiNDSET data ----
   return(df_mindset_xfrm)
 }
+
+# * The REDCap server for some reason isn't able to verify the Shiny server
+#   SSL certificate. Andrew Carroll's (MICHR) recommendation is to bypass
+#   the SSL certificate verfication... "for the time being".
 
 
 
