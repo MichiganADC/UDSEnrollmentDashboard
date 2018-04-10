@@ -12,7 +12,7 @@ if (length(new.package.list)) {
   install.packages(new.package.list,
                    repos = "https://cloud.r-project.org/",
                    verbose = TRUE) 
-  }
+}
 
 library(shiny)
 library(shinydashboard)
@@ -124,6 +124,7 @@ ui <- dashboardPage(
         h2("Cumulative Enrollments"),
         fluidRow(
           tabBox(
+            width = 12,
             title = "Cumulative Enrollments",
             id = "tabset1",
             height = "550px",
@@ -142,38 +143,42 @@ ui <- dashboardPage(
               box(width = 12,
                   plotOutput(outputId = "plot_cum_race"))
             ) # end tabPanel 3 -- Race plot
-          ), # end tabBox 1 for cumulative plots
+          ) # end tabBox 1 for cumulative plots
+        ),
+        fluidRow(
+          box( # start box 1 for date range input (cumulative)
+            width = 12,
+            dateRangeInput(inputId = "dateRange1",
+                           label = "Date range input: yyyy-mm-dd",
+                           start = as.Date("2017-03-01"), end = Sys.Date())
+          )
+        ),
+        fluidRow(
           tabBox(
+            width = 12,
             title = "Targer Enrollment by Diagnosis",
             id = "tabset2",
             height = "550px",
-            side = "right",
             tabPanel("NL",
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_nl"))),
             tabPanel("MCI",
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_mci"))),
+            tabPanel("AD",
+                     box(width = 12,
+                         plotOutput(outputId = "plot_cum_dx_target_ad"))),
             tabPanel("LBD",
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_lbd"))),
             tabPanel("FTD",
                      box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_ftd"))),
-            tabPanel("AD",
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_ad")))
+                         plotOutput(outputId = "plot_cum_dx_target_ftd")))
           ) # end tabBox 2 for target diagnosis plots
         ), # end fluidRow for plots
         fluidRow(
-          box( # start box 1 for date range input (cumulative)
-            width = 6,
-            dateRangeInput(inputId = "dateRange1",
-                           label = "Date range input: yyyy-mm-dd",
-                           start = as.Date("2017-03-01"), end = Sys.Date())
-          ), 
           box( # start box 2 for date range input (diagnosis)
-            width = 6,
+            width = 12,
             dateRangeInput(inputId = "dateRange2",
                            label = "Date range input: yyyy-mm-dd",
                            start = as.Date("2017-03-01"),
@@ -187,6 +192,7 @@ ui <- dashboardPage(
         h2("Maps"),
         fluidRow(
           tabBox(
+            width = 12,
             title = "",
             id = "map_tabset",
             height = "700px",
@@ -238,7 +244,7 @@ server <- function(input, output, session) {
     invalidateLater(invalidation_time, session)
     build_lst_summ_tbls( data_mindset_rctv() )
   })
-
+  
   ## df for plots
   data_plots <- reactive({
     invalidateLater(invalidation_time, session)

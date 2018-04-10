@@ -49,10 +49,10 @@ build_lst_map_dfs <- function(data) {
   
   mi_base_map <- ggplot(data = mi_state, aes(x = long, y = lat, group = group)) +
     coord_fixed(ratio = 1.3) +
-    geom_polygon(color = "black", fill = "gray") +
+    geom_polygon(color = "black", fill = "gray", size = 0.25) +
     theme_nothing() +
-    geom_polygon(data = mi_counties, fill = NA, color = "black", size = 0.1) +
-    geom_polygon(fill = NA, color = "black")
+    geom_polygon(data = mi_counties, fill = NA, color = "black", size = 0.25) +
+    geom_polygon(fill = NA, color = "black", size = 0.25)
   
   # # # # # 
   ## Build county map df ----
