@@ -83,41 +83,22 @@ ui <- dashboardPage(
         fluidRow( # start fluidRow for valueBoxes
           # valueBox 1,2,3 here
         ), # end fluidRow for valueBoxes
-        fluidRow(
-          box(width = 12,
-              h3("UDS Version"),
-              DT::dataTableOutput("uds_vers"))
-        ), # end fluidRow 
-        fluidRow(
-          box(width = 12,
-              h3("Sex"),
-              DT::dataTableOutput("sex"))
-        ), # end fluidRow
-        fluidRow(
-          box(width = 12,
-              h3("Race"),
-              DT::dataTableOutput("race"))
-        ), # end fluidRow
-        fluidRow(
-          box(width = 12,
-              h3("Research"),
-              DT::dataTableOutput("rsrch"))
-        ), # end fluidRow
-        fluidRow(
-          box(width = 12,
-              h3("Sex + Race"),
-              DT::dataTableOutput("sex_race"))
-        ), # end fluidRow
-        fluidRow(
-          box(width = 12,
-              h3("UDS Version + Research"),
-              DT::dataTableOutput("uds_rsrch"))
-        ), # end fluidRow
-        fluidRow(
-          box(width = 12,
-              h3("Race + MRI Yes"),
-              DT::dataTableOutput("race_mri_yes"))
-        ) # end fluidRow
+        fluidRow( box(width = 12, h3("UDS Version"), 
+                      DT::dataTableOutput("uds_vers")) ), 
+        fluidRow( box(width = 12, h3("Sex"), 
+                      DT::dataTableOutput("sex")) ), 
+        fluidRow( box(width = 12, h3("Race"),
+                      DT::dataTableOutput("race")) ), 
+        fluidRow( box(width = 12, h3("Research"),
+                      DT::dataTableOutput("rsrch")) ), 
+        fluidRow( box(width = 12, h3("Sex + Race"),
+                      DT::dataTableOutput("sex_race")) ), 
+        fluidRow( box(width = 12, h3("UDS Version + Research"),
+                      DT::dataTableOutput("uds_rsrch")) ), 
+        fluidRow( box(width = 12, h3("Sex + MRI Yes"),
+                      DT::dataTableOutput("sex_mri_yes")) ),
+        fluidRow( box(width = 12, h3("Race + MRI Yes"),
+                      DT::dataTableOutput("race_mri_yes")) )
       ), # end tabItem 1 for summary tables
       tabItem( # start tabItem 2 for plots
         tabName = "plots",
@@ -262,7 +243,7 @@ server <- function(input, output, session) {
   
   ## Use `observe` + `lapply` to render all the summary tables
   summ_tbl_names <- c("uds_vers", "sex", "race", "sex_race", 
-                      "rsrch", "uds_rsrch", "race_mri_yes")
+                      "rsrch", "uds_rsrch", "sex_mri_yes", "race_mri_yes")
   observe({
     lapply(summ_tbl_names, function(tbl_name) {
       output[[tbl_name]] <- DT::renderDataTable({

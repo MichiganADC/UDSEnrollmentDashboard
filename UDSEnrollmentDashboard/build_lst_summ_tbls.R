@@ -137,6 +137,38 @@ build_lst_summ_tbls <- function(data) {
                             filter_var = quo(blood_drawn),
                             filter_var_string = "1. Yes")
   
+  # Sex + Research: Autopsy Yes counts
+  lst_summ_cts$sex_autopsy_yes_cts <-
+    double_grp_filter_table(data,
+                            group_var_1 = quo(uds_dx),
+                            group_var_2 = quo(sex_value),
+                            filter_var = quo(consent_to_autopsy),
+                            filter_var_string = "Yes")
+  
+  # Sex + Research: Autopsy Considering counts
+  lst_summ_cts$sex_autopsy_consid_cts <-
+    double_grp_filter_table(data,
+                            group_var_1 = quo(uds_dx),
+                            group_var_2 = quo(sex_value),
+                            filter_var = quo(consent_to_autopsy),
+                            filter_var_string = "Considering")
+  
+  # Sex + Research: MRI Yes counts
+  lst_summ_cts$sex_mri_yes_cts <-
+    double_grp_filter_table(data,
+                            group_var_1 = quo(uds_dx),
+                            group_var_2 = quo(sex_value),
+                            filter_var = quo(mri_completed),
+                            filter_var_string = "1. Yes")
+  
+  # Sex + Research: Blood Drawn Yes counts
+  lst_summ_cts$sex_blood_yes_cts <-
+    double_grp_filter_table(data,
+                            group_var_1 = quo(uds_dx),
+                            group_var_2 = quo(sex_value),
+                            filter_var = quo(blood_drawn),
+                            filter_var_string = "1. Yes")
+  
   
   # # # # # 
   # Build lst_summ_tbls ----
@@ -192,6 +224,12 @@ build_lst_summ_tbls <- function(data) {
   #             lst_summ_cts$race_blood_yes_cts[, -1]) %>% 
   #   arrange(tolower(uds_dx))
   
+  # Sex + MRI Yes table
+  lst_summ_tbls$sex_mri_yes_tbl <-
+    bind_cols(lst_summ_cts$total_cts,
+             lst_summ_cts$sex_mri_yes_cts[, -1]) %>% 
+    arrange(tolower(uds_dx))
+  
   # Race + MRI Yes table
   lst_summ_tbls$race_mri_yes_tbl <-
     bind_cols(lst_summ_cts$total_cts,
@@ -202,12 +240,12 @@ build_lst_summ_tbls <- function(data) {
   lst_summ_tbls <- lapply(lst_summ_tbls, function(tbl) {
     add_totals_row(tbl)
   })
-
+  
   ## Add a "proportions row" to each table in `lst_summ_tbls`
   lst_summ_tbls <- lapply(lst_summ_tbls, function(tbl) {
     add_proportions_row(tbl)
   })
-
+  
   ## Ensure that appropriate cols in each table of `lst_summ_tbls` are numeric
   lst_summ_tbls <- lapply(lst_summ_tbls, function(tbl) { 
     tbl[, -1] <- purrr::map(tbl[, -1], as.numeric) 

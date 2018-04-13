@@ -13,7 +13,8 @@ today_line <-
              color = today_col, linetype = "dashed")
 
 ## Axis theme
-custom_theme <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
+custom_theme <- theme(text = element_text(size = 15), 
+                      axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Fxn for cumulative plot (no groups)
 cum_plot <- function(df, x, y, plot_title, start_date, end_date) {
@@ -29,7 +30,7 @@ cum_plot <- function(df, x, y, plot_title, start_date, end_date) {
                  limits = c(start_date, end_date)
                  ) +
     scale_y_continuous(name = "Cumulative Participants",
-                       breaks = seq(0, nrow(df) + 10, by = 10)) +
+                       breaks = seq(0, nrow(df) + 10, by = 20)) +
     custom_theme +
     ggtitle(label = plot_title)
 }
@@ -51,7 +52,7 @@ cum_plot_single_grp <- function(df, x, y, group_var,
                  limits = c(start_date, end_date)
                  ) +
     scale_y_continuous(name = "Cumulative Participants",
-                       breaks = seq(0, nrow(df) + 10, by = 10)) + 
+                       breaks = seq(0, nrow(df) + 10, by = 20)) + 
     custom_theme +
     ggtitle(label = plot_title)
 }
@@ -76,7 +77,7 @@ cum_plot_dx_target_dx <- function(df, x, y, group_var,
                  limits = c(start_date, end_date)
                  ) +
     scale_y_continuous(name = "Cumulative Participants",
-                       breaks = seq(0, nrow(df) + 10, by = 10)) +
+                       breaks = seq(0, nrow(df) + 10, by = 20)) +
     custom_theme +
     ggtitle(label = plot_title)
 }
