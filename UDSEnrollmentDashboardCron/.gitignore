@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+*.csv
+*.xlsx
+*.xls
+config.R
+*crontab*
+*.Rds
+*.rds
