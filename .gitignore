@@ -9,3 +9,4 @@
 config.R
 *crontab*
 *.Rds
+*.rds
