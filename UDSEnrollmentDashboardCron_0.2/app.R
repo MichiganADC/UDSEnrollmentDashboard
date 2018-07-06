@@ -59,7 +59,7 @@ if (deployed) {
     "~/ShinyApps/MADCDashboard/" # Michigan Medicine R Shiny server
 } else {
   path_to_app <-
-    "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron/" # local
+    "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
 source(paste0(path_to_app, "helper_fxns_plots.R"), local = TRUE)
@@ -271,19 +271,22 @@ server <- function(input, output, session) {
   lst_summ_tbls <-
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/lst_summ_tbls.Rds",
-                       readFunc = readRDS)
+                       readFunc = readRDS,
+                       session = NULL)
   
   ## df for plots
   data_plots <-
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/data_plots.Rds",
-                       readFunc = readRDS)
+                       readFunc = readRDS,
+                       session = NULL)
   
   ## List for maps
   lst_map_dfs <-
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/lst_map_dfs.Rds",
-                       readFunc = readRDS)
+                       readFunc = readRDS,
+                       session = NULL)
   
   # ## List for summary tables
   # lst_summ_tbls <- build_lst_summ_tbls(df_mindset_xfrm)

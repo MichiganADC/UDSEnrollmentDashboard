@@ -24,7 +24,7 @@ if (deployed) {
     "~/ShinyApps/MADCDashboard/" # Michigan Medicine R Shiny server
 } else {
   path_to_app <-
-    "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron/" # local
+    "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
 data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
