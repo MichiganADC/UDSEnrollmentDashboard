@@ -91,9 +91,8 @@ add_dx_target_rows <- function(df, dx, dx_target, annual_targets) {
   names(target_df) <- names(df)
   target_df$subject_id <- paste0("UM0000XXX", 0:5)
   target_df$exam_date <- lubridate::as_date(paste0(2017:2022, "-03-01"))
-  dx_levels <- c("MCI", "NL", "LBD", "AD", "Impaired, not MCI",
-                 "Pending consensus", "FTD", "Withdrew",
-                 "Amnestic multidomain", "Depression", "Other",
+  dx_levels <- c("MCI", "NL", "LBD", "AD", "FTD", "Impaired, not MCI",
+                 "Pending consensus", "Withdrew", "Other",
                  # target diagnoses
                  "MCI target", "NL target", "LBD target",
                  "AD target", "FTD target")

@@ -2,16 +2,7 @@
 
 # Build list of report summary tables
 
-# operational <- TRUE
 deployed <- TRUE
-
-# if (operational) {
-#   data <- readRDS("./rds/df_mindset_xfrm.Rds")
-#   source("helper_fxns_summ_tbls.R", local = TRUE)
-# } else {
-#   data <- readRDS("./UDSEnrollmentDashboardCron/rds/df_mindset_xfrm.Rds")
-#   source("./UDSEnrollmentDashboardCron/helper_fxns_summ_tbls.R", local = TRUE)
-# }
 
 if (deployed) {
   path_to_app <-
@@ -284,6 +275,7 @@ lst_summ_tbls$uds_rsrch_tbl <- lst_summ_tbls$uds_rsrch_tbl %>%
          `UDS 2/3 Autopsy Consider` = `UDS 2/31`, `UDS 3 Autopsy Consider` = `UDS 31`,
          `UDS 2/3 MRI Yes` = `UDS 2/32`, `UDS 3 MRI Yes` = `UDS 32`,
          `UDS 2/3 Blood Yes` = `UDS 2/33`, `UDS 3 Blood Yes` = `UDS 33`)
+
 
 # # # # # 
 ## Return `lst_summ_tbls` ---

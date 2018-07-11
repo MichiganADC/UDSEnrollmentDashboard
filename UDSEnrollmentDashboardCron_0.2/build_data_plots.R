@@ -5,16 +5,7 @@
 library(dplyr)
 library(ggplot2)
 
-# operational <- TRUE
 deployed <- TRUE
-
-# if (operational) {
-#   data <- readRDS("./rds/df_mindset_xfrm.Rds")
-#   source("helper_fxns_plots.R", local = TRUE)
-# } else {
-#   data <- readRDS("./UDSEnrollmentDashboardCron/rds/df_mindset_xfrm.Rds")
-#   source("./UDSEnrollmentDashboardCron/helper_fxns_plots.R", local = TRUE)
-# }
 
 if (deployed) {
   path_to_app <-

@@ -8,16 +8,7 @@ library(maps)
 library(mapdata)
 library(zipcode)
 
-# operational <- TRUE
 deployed <- TRUE
-
-# if (operational) {
-#   data <- readRDS("./rds/df_mindset_xfrm.Rds")
-#   load("mi_counties_list.Rdata")
-# } else {
-#   data <- readRDS("./UDSEnrollmentDashboardCron/rds/df_mindset_xfrm.Rds")
-#   load("./UDSEnrollmentDashboardCron/mi_counties_list.Rdata")
-# }
 
 if (deployed) {
   path_to_app <-

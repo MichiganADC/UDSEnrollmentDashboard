@@ -29,9 +29,7 @@ library(maps)
 library(mapdata)
 library(zipcode)
 
-# operational <- TRUE
 deployed <- TRUE
-# deployed <- FALSE
 dt_options <- list(paging = FALSE,
                    searching = FALSE,
                    ordering = FALSE,
@@ -39,20 +37,6 @@ dt_options <- list(paging = FALSE,
 
 # # # # #
 ## Source files ---- 
-
-# if (operational) {
-#   # df_mindset_xfrm <- readRDS("df_mindset_xfrm.Rds")
-#   # source("build_lst_summ_tbls.R", local = TRUE)
-#   # source("build_data_plots.R", local = TRUE)
-#   # source("build_lst_map_dfs.R", local = TRUE)
-#   source("helper_fxns_plots.R", local = TRUE)
-# } else {
-#   # df_mindset_xfrm <- readRDS("./UDSEnrollmentDashboardCron/df_mindset_xfrm.Rds")
-#   # source("./UDSEnrollmentDashboardCron/build_lst_summ_tbls.R", local = TRUE)
-#   # source("./UDSEnrollmentDashboardCron/build_data_plots.R", local = TRUE)
-#   # source("./UDSEnrollmentDashboardCron/build_lst_map_dfs.R", local = TRUE)
-#   source("./UDSEnrollmentDashboardCron/helper_fxns_plots.R", local = TRUE)
-# }
 
 if (deployed) {
   path_to_app <-
@@ -64,14 +48,7 @@ if (deployed) {
 
 source(paste0(path_to_app, "helper_fxns_plots.R"), local = TRUE)
 
-# ## List for summary tables
-# lst_summ_tbls <- build_lst_summ_tbls(df_mindset_xfrm)
-# 
-# ## df for plots
-# data_plots <- build_data_plots(df_mindset_xfrm)
-# 
-# ## List for maps
-# lst_map_dfs <- build_lst_map_dfs(df_mindset_xfrm)
+
 
 ## ui ---- 
 ui <- dashboardPage( 
@@ -86,6 +63,7 @@ ui <- dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       menuItem(text = "Summary", tabName = "summary", icon = icon("table")),
+      menuItem(text = "Timelines", tabName = "timelines", icon = icon("clock-o")),
       menuItem(text = "Plots", tabName = "plots", icon = icon("signal")),
       menuItem(text = "Maps", tabName = "maps", icon = icon("map"))
     ) # end sidebarMenu
@@ -100,7 +78,7 @@ ui <- dashboardPage(
     
     ## Tab container ---
     tabItems(
-      tabItem( # start tabItem 1 for summary tables
+      tabItem( # start tabItem for summary tables
         tabName = "summary",
         h2("Summary Tables"),
         fluidRow( # start fluidRow for valueBoxes
@@ -122,15 +100,34 @@ ui <- dashboardPage(
                       DT::dataTableOutput("sex_mri_yes")) ),
         fluidRow( box(width = 12, h3("Race + MRI Yes"),
                       DT::dataTableOutput("race_mri_yes")) )
-      ), # end tabItem 1 for summary tables
-      tabItem( # start tabItem 2 for plots
+      ), # end tabItem for summary tables
+      tabItem( # start tabItem for timeline tables/plots
+        tabName = "timelines",
+        h2("Timelines"),
+        fluidRow( 
+          box(width = 12, h3("Participant Timelines"),
+              DT::dataTableOutput("timeline")) ),
+        fluidRow(
+          box(width = 6, h3("Visit to Scored"),
+              plotOutput(outputId = "plot_timeline_exam_scored_hist")),
+          box(width = 6, h3("Visit to Double Scored"),
+              plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
+        ),
+        fluidRow(
+          box(width = 6, h3("Visit to First Consensus"),
+              plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
+          box(width = 6, h3("Final Consensus to Feedback"),
+              plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
+        )
+      ),
+      tabItem( # start tabItem for plots
         tabName = "plots",
         h2("Cumulative Enrollments"),
         fluidRow(
           tabBox(
             width = 12,
             title = "Cumulative Enrollments",
-            id = "tabset1",
+            id = "tabset_cumenroll",
             height = "550px",
             tabPanel(
               title = "Total",
@@ -160,8 +157,8 @@ ui <- dashboardPage(
         fluidRow(
           tabBox(
             width = 12,
-            title = "Targer Enrollment by Diagnosis",
-            id = "tabset2",
+            title = "Target Enrollment by Diagnosis",
+            id = "tabset_targenroll",
             height = "550px",
             tabPanel("NL",
                      box(width = 12,
@@ -190,15 +187,15 @@ ui <- dashboardPage(
             )
           )
         ) # end fluidRow for interactive dates
-      ), # end tabItem 2 for plots
-      tabItem( # start tabItem 3 for maps
+      ), # end tabItem for plots
+      tabItem( # start tabItem for maps
         tabName = "maps",
         h2("Maps"),
         fluidRow(
           tabBox(
             width = 12,
             title = "",
-            id = "map_tabset",
+            id = "tabset_map",
             height = "700px",
             side = "left",
             tabPanel(
@@ -219,7 +216,7 @@ ui <- dashboardPage(
             ) # end tabPanel 2 -- ZIP map
           ) # end tabBox
         ) # end fluidRow
-      ) # end tabItem 3 for maps
+      ) # end tabItem for maps
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
@@ -237,40 +234,25 @@ server <- function(input, output, session) {
   # # # # # 
   ## Get data ----
   
-  # ## Reactive df for core data
-  # data_mindset_rctv <- reactive({
-  #   invalidateLater(invalidation_time, session)
-  #   get_data_mindset() # source: etl_mindset_uds2.R
-  # })
-  # 
-  # ## List for summary tables
-  # lst_summ_tbls <- reactive({
-  #   invalidateLater(invalidation_time, session)
-  #   build_lst_summ_tbls( data_mindset_rctv() )
-  # })
-  # 
-  # ## df for plots
-  # data_plots <- reactive({
-  #   invalidateLater(invalidation_time, session)
-  #   build_data_plots( data_mindset_rctv() )
-  # })
-  # 
-  # ## List for maps
-  # lst_map_dfs <- reactive({
-  #   invalidateLater(invalidation_time, session)
-  #   build_lst_map_dfs( data_mindset_rctv() )
-  # })
-  
-  ## Read in df for core data
-  # df_mindset_xfrm <- 
-  #   reactiveFileReader(intervalMillis = invalidation_time,
-  #                      filePath = "df_mindset_xfrm.Rds",
-  #                      readFunc = readRDS)
+  ## Raw MiNDSet data
+  # data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
+  data <- 
+    reactiveFileReader(intervalMillis = invalidation_time,
+                       filePath = "./rds/df_mindset_xfrm.Rds",
+                       readFunc = readRDS,
+                       session = NULL)
   
   ## List for summary tables
   lst_summ_tbls <-
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/lst_summ_tbls.Rds",
+                       readFunc = readRDS,
+                       session = NULL)
+  
+  ## List for timeline tables
+  lst_timeline_tbls <-
+    reactiveFileReader(intervalMillis = invalidation_time,
+                       filePath = "./rds/lst_timeline_tbls.Rds",
                        readFunc = readRDS,
                        session = NULL)
   
@@ -288,17 +270,9 @@ server <- function(input, output, session) {
                        readFunc = readRDS,
                        session = NULL)
   
-  # ## List for summary tables
-  # lst_summ_tbls <- build_lst_summ_tbls(df_mindset_xfrm)
-  # 
-  # ## df for plots
-  # data_plots <- build_data_plots(df_mindset_xfrm)
-  # 
-  # ## List for maps
-  # lst_map_dfs <- build_lst_map_dfs(df_mindset_xfrm)
   
   # # # # # 
-  ## Render tables ----
+  ## Render summary tables ----
   
   ## Use `observe` + `lapply` to render all the summary tables
   summ_tbl_names <- c("uds_vers", "sex", "race", "sex_race", 
@@ -317,8 +291,58 @@ server <- function(input, output, session) {
   #   DT::datatable( data_mindset_rctv(), options = dt_options ) 
   # })
   
+  # # # # #
+  ## Render timeline tables ----
+  
+  ## Use `observe` + `lapply` to render all the summary tables
+  timeline_tbl_names <- c("timeline")
+  observe({
+    lapply(timeline_tbl_names, function(tbl_name) {
+      output[[tbl_name]] <- DT::renderDataTable({
+        DT::datatable( lst_timeline_tbls()[[paste0(tbl_name, "_tbl")]], 
+                       options = dt_options )
+      })
+    }) # end `lapply`
+  }) # end `observe`
+  
   # # # # # 
   ## Render plots ----
+  
+  ## Timeline - Visit to Score plot
+  output$plot_timeline_exam_scored_hist <- renderPlot({
+    ggplot(data = data(), aes(x = exam_scored_dur)) +
+      geom_histogram(binwidth = 5, center = 2.5, 
+                     color = "#000000", fill = "#3885B7",
+                     na.rm = TRUE) +
+      scale_x_continuous(name = "Days")
+  })
+  
+  ## Timeline - Visit to Double Score plot
+  output$plot_timeline_exam_dbl_scored_hist <- renderPlot({
+    ggplot(data = data(), aes(x = exam_dbl_scored_dur)) +
+      geom_histogram(binwidth = 5, center = 2.5, 
+                     color = "#000000", fill = "#3885B7",
+                     na.rm = TRUE) +
+      scale_x_continuous(name = "Days")
+  })
+  
+  ## Timeline - Visit to First Consensus plot
+  output$plot_timeline_exam_consensus_dur_hist <- renderPlot({
+    ggplot(data = data(), aes(x = exam_consensus_dur)) +
+      geom_histogram(binwidth = 25, center = 12.5, 
+                     color = "#000000", fill = "#3885B7",
+                     na.rm = TRUE) +
+      scale_x_continuous(name = "Days")
+  })
+  
+  ## Timeline - Final Consensus to Feedback plot
+  output$plot_timeline_final_consensus_fb_hist <- renderPlot({
+    ggplot(data = data(), aes(x = final_consensus_fb_dur)) +
+      geom_histogram(binwidth = 25, center = 12.5, 
+                     color = "#000000", fill = "#3885B7",
+                     na.rm = TRUE) +
+      scale_x_continuous(name = "Days")
+  })
   
   ## Cumulative enrollment totals plot
   output$plot_cum_total <- renderPlot({

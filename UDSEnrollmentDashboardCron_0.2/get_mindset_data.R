@@ -7,14 +7,7 @@ library(jsonlite)
 library(dplyr)
 library(tidyr)
 
-# operational <- TRUE
 deployed <- TRUE
-
-# if (operational) {
-#   source(paste0(path_to_app, "config.R"), local = TRUE)
-# } else {
-#   source(paste0(path_to_app, "UDSEnrollmentDashboardCron/config.R"), local = TRUE)
-# }
 
 if (deployed) {
   path_to_app <-
@@ -25,6 +18,7 @@ if (deployed) {
 }
 
 source(paste0(path_to_app, "config.R"), local = TRUE)
+
 
 # get_data_mindset <- function() {
 
@@ -85,6 +79,12 @@ ms_json <- RCurl::postForm(
   .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
 )
 df_mindset_xfrm <- jsonlite::fromJSON(ms_json)
+## Copy df_mindset
+# df_mindset_xfrm <- df_mindset # build / debug
+# # # # #
+## Filter rows ----
+df_mindset_xfrm <- df_mindset_xfrm %>% 
+  dplyr::filter(stringr::str_sub(subject_id, 1, 2) == "UM")
 
 ## Retrieve UDS 2.0 IDs data from R/C API
 ## ... keep only relevant field(s)
@@ -107,8 +107,107 @@ df_uds2_id <-
   dplyr::select(subject_id) # only keep `subject_id` column
 
 
-## Copy df_mindset
-# df_mindset_xfrm <- df_mindset # build / debug
+## Retrieve UDS 3.0 data from R/C API
+uds3_json <- RCurl::postForm(
+  uri=API_URL,
+  token=UDS3_API_TOKEN,
+  content='record',
+  format='json',
+  type='flat',
+  'fields[0]'='ptid',
+  'fields[1]'='form_date',
+  # Initial visits
+  'fields[2]'='normcog',   # NL
+  'fields[3]'='demented',  # --
+  'fields[4]'='mciamem',   # aMCI
+  'fields[5]'='mciaplus',  # aMCI
+  'fields[6]'='mcinon1',   # naMCI
+  'fields[7]'='mcinon2',   # naMCI
+  'fields[8]'='impnomci', # Cognitively impaired
+  'fields[9]'='alzdis',   # AD
+  'fields[10]'='alzdisif', # AD
+  'fields[11]'='lbdis',    # LBD
+  'fields[12]'='lbdif',    # LBD
+  'fields[13]'='psp',      # FTD
+  'fields[14]'='pspif',    # FTD
+  'fields[15]'='cort',     # FTD
+  'fields[16]'='cortif',   # FTD
+  'fields[17]'='ftldmo',   # FTD
+  'fields[18]'='ftldmoif', # FTD
+  'fields[19]'='ftldnos',  # FTD
+  'fields[20]'='ftldnoif', # FTD
+  # Follow-up visits
+  'fields[21]'='fu_normcog',   # NL
+  'fields[22]'='fu_demented',  # --
+  'fields[23]'='fu_mciamem',   # aMCI
+  'fields[24]'='fu_mciaplus',  # aMCI
+  'fields[25]'='fu_mcinon1',   # naMCI
+  'fields[26]'='fu_mcinon2',   # naMCI
+  'fields[27]'='fu_impnomci',  # Cognitively impaired
+  'fields[28]'='fu_alzdis',    # AD
+  'fields[29]'='fu_alzdisif',  # AD
+  'fields[30]'='fu_lbdis',     # LBD
+  'fields[31]'='fu_lbdif',     # LBD
+  'fields[32]'='fu_psp',       # FTD
+  'fields[33]'='fu_pspif',     # FTD
+  'fields[34]'='fu_cort',      # FTD
+  'fields[35]'='fu_cortif',    # FTD
+  'fields[36]'='fu_ftldmo',    # FTD
+  'fields[37]'='fu_ftldmoif',  # FTD
+  'fields[38]'='fu_ftldnos',   # FTD
+  'fields[39]'='fu_ftldnoif',  # FTD
+  rawOrLabel='raw',
+  rawOrLabelHeaders='raw',
+  exportCheckboxLabel='false',
+  exportSurveyFields='false',
+  exportDataAccessGroups='false',
+  returnFormat='json',
+  # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # can't use now*
+  .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
+)
+uds3_df <- jsonlite::fromJSON(uds3_json)
+uds3_df <- uds3_df %>% 
+  dplyr::filter(form_date != "")
+uds3_df <- uds3_df %>% 
+  dplyr::mutate(uds_dx = dplyr::case_when(
+    # Initial visits
+    normcog == 1                                  ~ "NL",
+    demented != 1 & mciamem == 1                  ~ "aMCI",
+    demented != 1 & mciaplus == 1                 ~ "aMCI",
+    demented != 1 & mcinon1 == 1                  ~ "naMCI",
+    demented != 1 & mcinon2 == 1                  ~ "naMCI",
+    demented != 1 & impnomci == 1                 ~ "Impaired, not MCI",
+    demented == 1 & alzdis == 1   & alzdisif == 1 ~ "AD",
+    demented == 1 & lbdis == 1    & lbdif == 1    ~ "LBD",
+    demented == 1 & psp == 1      & pspif == 1    ~ "FTD",
+    demented == 1 & cort == 1     & cortif == 1   ~ "FTD",
+    demented == 1 & ftldmo == 1   & ftldmoif == 1 ~ "FTD",
+    demented == 1 & ftldnos == 1  & ftldnoif == 1 ~ "FTD",
+    # Follow-up visits
+    fu_normcog == 1                                        ~ "NL",
+    fu_demented != 1 & fu_mciamem == 1                     ~ "aMCI",
+    fu_demented != 1 & fu_mciaplus == 1                    ~ "aMCI",
+    fu_demented != 1 & fu_mcinon1 == 1                     ~ "naMCI",
+    fu_demented != 1 & fu_mcinon2 == 1                     ~ "naMCI",
+    fu_demented != 1 & fu_impnomci == 1                    ~ "Impaired, not MCI",
+    fu_demented == 1 & fu_alzdis == 1   & fu_alzdisif == 1 ~ "AD",
+    fu_demented == 1 & fu_lbdis == 1    & fu_lbdif == 1    ~ "LBD",
+    fu_demented == 1 & fu_psp == 1      & fu_pspif == 1    ~ "FTD",
+    fu_demented == 1 & fu_cort == 1     & fu_cortif == 1   ~ "FTD",
+    fu_demented == 1 & fu_ftldmo == 1   & fu_ftldmoif == 1 ~ "FTD",
+    fu_demented == 1 & fu_ftldnos == 1  & fu_ftldnoif == 1 ~ "FTD",
+    TRUE ~ "Other"
+  ))
+
+ms_dx <- df_mindset_xfrm %>% 
+  dplyr::select(subject_id, exam_date, uds_dx)
+uds3_dx <- uds3_df %>% 
+  dplyr::select(ptid, form_date, uds_dx) %>% 
+  dplyr::rename(subject_id = ptid,
+                exam_date = form_date)
+ms_uds3_dx <- dplyr::left_join(ms_dx, uds3_dx, by = c("subject_id", "exam_date"))
+df_mindset_xfrm$uds_dx <- ms_uds3_dx$uds_dx.y
+# readr::write_csv(ms_uds3_dx, "ms_uds3_dx.csv", na = "")
 
 # # # # #  
 ## Define factor levels ----
@@ -123,9 +222,8 @@ redcap_event_name_levels <- c("Baseline",
                               paste0("Visit ", 10:15))
 
 ## 2. dx_levels
-dx_levels <- c("MCI", "NL", "LBD", "AD", "Impaired, not MCI",
-               "Pending consensus", "FTD", "Withdrew",
-               "Amnestic multidomain", "Depression", "Other",
+dx_levels <- c("MCI", "NL", "LBD", "AD", "FTD", "Impaired, not MCI",
+               "Pending consensus", "Withdrew", "Other",
                # target diagnoses
                "MCI target", "NL target", "LBD target",
                "AD target", "FTD target")
@@ -138,10 +236,6 @@ race_levels <- c("Asian", "Black", "Other", "White",
 ## 4. sex_levels
 sex_levels <- c("Female", "Male")
 
-# # # # #
-## Filter rows ----
-df_mindset_xfrm <- df_mindset_xfrm %>% 
-  dplyr::filter(stringr::str_sub(subject_id, 1, 2) == "UM")
 
 # # # # # 
 ## Mutate fields (if nec.); Coerce fields to appropriate classes ----
@@ -167,36 +261,52 @@ df_mindset_xfrm <- df_mindset_xfrm %>%
                 fb_date          = lubridate::ymd(fb_date))
 
 ## Mutate `uds_dx` and coerce to factor class
+# df_mindset_xfrm <- df_mindset_xfrm %>%
+#   dplyr::mutate(uds_dx = dplyr::case_when(
+#     uds_dx == "Amnestic MCI-memory only"          ~ "MCI",
+#     uds_dx == "Amnestic MCI-memory plus"          ~ "MCI",
+#     uds_dx == "Amnestic MCI, multiple domains"    ~ "MCI",
+#     uds_dx == "Amnestic MCI, single domain"       ~ "MCI",
+#     uds_dx == "Amnestic multidomain dementia syndrome"
+#     ~ "Amnestic multidomain",
+#     uds_dx == "Dem with Lewy bodies"              ~ "LBD",
+#     uds_dx == "FTD"                               ~ "FTD",
+#     uds_dx == "Impaired, not MCI"                 ~ "Impaired, not MCI",
+#     uds_dx == "NL"                                ~ "NL",
+#     uds_dx == "Non-Amnestic MCI-multiple domains" ~ "MCI",
+#     uds_dx == "Non-Amnestic MCI-single domain"    ~ "MCI",
+#     uds_dx == "Other"                             ~ "Other",
+#     uds_dx == "Patient never came to consensus"   ~ "Withdrew",
+#     uds_dx == "Per Center Decision-patient did not come to consensus-milestoned out of study"
+#     ~ "Withdrew",
+#     uds_dx == "Possible AD"                       ~ "AD",
+#     uds_dx == "Primary progressive aphasia"       ~ "FTD",
+#     uds_dx == "Probable AD"                       ~ "AD",
+#     uds_dx == "Vascular dem"                      ~ "Other",
+#     uds_dx == "Depression"                        ~ "Depression",
+#     is.na(uds_dx) & comp_withd == "Y"             ~ "Withdrew",
+#     uds_dx == "" & comp_withd == "Y"              ~ "Withdrew",
+#     is.na(uds_dx) & is.na(comp_withd)             ~ "Pending consensus",
+#     uds_dx == "" & comp_withd == ""               ~ "Pending consensus",
+#     is.na(uds_dx) & comp_withd == ""              ~ "Pending consensus",
+#     uds_dx == "" & is.na(comp_withd)              ~ "Pending consensus",
+#     is.na(uds_dx) | uds_dx == ""                  ~ "Other",
+#     TRUE ~ uds_dx
+#   )) %>%
+#   dplyr::mutate(uds_dx =
+#                   readr::parse_factor(uds_dx,
+#                                       levels = dx_levels))
 df_mindset_xfrm <- df_mindset_xfrm %>%
   dplyr::mutate(uds_dx = dplyr::case_when(
-    uds_dx == "Amnestic MCI-memory only"          ~ "MCI",
-    uds_dx == "Amnestic MCI-memory plus"          ~ "MCI",
-    uds_dx == "Amnestic MCI, multiple domains"    ~ "MCI",
-    uds_dx == "Amnestic MCI, single domain"       ~ "MCI",
-    uds_dx == "Amnestic multidomain dementia syndrome"
-    ~ "Amnestic multidomain",
-    uds_dx == "Dem with Lewy bodies"              ~ "LBD",
-    uds_dx == "FTD"                               ~ "FTD",
-    uds_dx == "Impaired, not MCI"                 ~ "Impaired, not MCI",
-    uds_dx == "NL"                                ~ "NL",
-    uds_dx == "Non-Amnestic MCI-multiple domains" ~ "MCI",
-    uds_dx == "Non-Amnestic MCI-single domain"    ~ "MCI",
-    uds_dx == "Other"                             ~ "Other",
-    uds_dx == "Patient never came to consensus"   ~ "Withdrew",
-    uds_dx == "Per Center Decision-patient did not come to consensus-milestoned out of study"
-    ~ "Withdrew",
-    uds_dx == "Possible AD"                       ~ "AD",
-    uds_dx == "Primary progressive aphasia"       ~ "FTD",
-    uds_dx == "Probable AD"                       ~ "AD",
-    uds_dx == "Vascular dem"                      ~ "Other",
-    uds_dx == "Depression"                        ~ "Depression",
-    is.na(uds_dx) & comp_withd == "Y"             ~ "Withdrew",
-    uds_dx == "" & comp_withd == "Y"              ~ "Withdrew",
-    is.na(uds_dx) & is.na(comp_withd)             ~ "Pending consensus",
-    uds_dx == "" & comp_withd == ""               ~ "Pending consensus",
-    is.na(uds_dx) & comp_withd == ""              ~ "Pending consensus",
-    uds_dx == "" & is.na(comp_withd)              ~ "Pending consensus",
-    is.na(uds_dx) | uds_dx == ""                  ~ "Other",
+    uds_dx == "aMCI"                  ~ "MCI",
+    uds_dx == "naMCI"                 ~ "MCI",
+    is.na(uds_dx) & comp_withd == "Y" ~ "Withdrew",
+    uds_dx == "" & comp_withd == "Y"  ~ "Withdrew",
+    is.na(uds_dx) & is.na(comp_withd) ~ "Pending consensus",
+    uds_dx == "" & comp_withd == ""   ~ "Pending consensus",
+    is.na(uds_dx) & comp_withd == ""  ~ "Pending consensus",
+    uds_dx == "" & is.na(comp_withd)  ~ "Pending consensus",
+    is.na(uds_dx) | uds_dx == ""      ~ "Other",
     TRUE ~ uds_dx
   )) %>%
   dplyr::mutate(uds_dx =
@@ -287,11 +397,11 @@ df_mindset_xfrm <- df_mindset_xfrm %>%
 
 ## Arrange and clean `df_mindset_xfrm` ----
 
-## Arrange data frame by subject_id (1st), then exam_date (2nd)
+## Arrange data frame by subject_id (1st), then exam_date (desc, 2nd)
 df_mindset_xfrm <- df_mindset_xfrm %>%
   dplyr::arrange(subject_id, dplyr::desc(exam_date))
 
-## Clean out duplicate visits ... keeping oldest visit
+## Clean out duplicate visits ... keeping newest visit
 duplicated_subject_ids <- duplicated(df_mindset_xfrm$subject_id)
 df_mindset_xfrm <- df_mindset_xfrm %>%
   dplyr::filter(!duplicated_subject_ids)
@@ -322,36 +432,6 @@ saveRDS(df_mindset_xfrm, paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
 #   SSL certificate. Andrew Carroll's (MICHR) recommendation is to bypass
 #   the SSL certificate verfication... "for the time being".
 
-
-# df_mindset_xfrm %>% 
-#   dplyr::filter(!is.na(exam_scored_dur)) %>% 
-#   dplyr::summarize(N = n(), 
-#                    Mean = mean(exam_scored_dur), 
-#                    SD = sd(exam_scored_dur), 
-#                    SEM = (sd(exam_scored_dur) / sqrt(n())))
-# df_mindset_xfrm %>% 
-#   dplyr::filter(!is.na(exam_dbl_scored_dur)) %>% 
-#   dplyr::summarize(N = n(), 
-#                    Mean = mean(exam_dbl_scored_dur), 
-#                    SD = sd(exam_dbl_scored_dur), 
-#                    SEM = (sd(exam_dbl_scored_dur) / sqrt(n())))
-# df_mindset_xfrm %>% 
-#   dplyr::filter(!is.na(exam_consensus_dur)) %>% 
-#   dplyr::summarize(N = n(), 
-#                    Mean = mean(exam_consensus_dur), 
-#                    SD = sd(exam_consensus_dur), 
-#                    SEM = (sd(exam_consensus_dur) / sqrt(n())))
-# df_mindset_xfrm %>% 
-#   dplyr::filter(!is.na(final_consensus_fb_dur)) %>% 
-#   dplyr::summarize(N = n(), 
-#                    Mean = mean(final_consensus_fb_dur), 
-#                    SD = sd(final_consensus_fb_dur), 
-#                    SEM = (sd(final_consensus_fb_dur) / sqrt(n())))
-# 
-# hist(df_mindset_xfrm$exam_scored_dur)
-# hist(df_mindset_xfrm$exam_dbl_scored_dur)
-# hist(df_mindset_xfrm$exam_consensus_dur)
-# hist(df_mindset_xfrm$final_consensus_fb_dur)
 
 
 
