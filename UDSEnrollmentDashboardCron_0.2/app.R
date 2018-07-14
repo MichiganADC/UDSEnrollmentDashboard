@@ -29,7 +29,7 @@ library(maps)
 library(mapdata)
 library(zipcode)
 
-deployed <- TRUE
+deployed <- FALSE
 dt_options <- list(paging = FALSE,
                    searching = FALSE,
                    ordering = FALSE,
@@ -39,15 +39,15 @@ dt_options <- list(paging = FALSE,
 ## Source files ---- 
 
 if (deployed) {
-  path_to_app <-
-    "~/ShinyApps/MADCDashboard/" # Michigan Medicine R Shiny server
+  path_to_app <- # Michigan Medicine R Shiny server
+    "~/ShinyApps/MADCDashboard/" 
 } else {
-  path_to_app <-
-    "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
+  path_to_app <- # local
+    paste0("~/Documents/GitHub/UDSEnrollmentDashboard/",
+           "UDSEnrollmentDashboardCron_0.2/") 
 }
 
 source(paste0(path_to_app, "helper_fxns_plots.R"), local = TRUE)
-
 
 
 ## ui ---- 
@@ -56,34 +56,40 @@ ui <- dashboardPage(
   ## Dashboard skin color
   skin = "blue", 
   
-  ## Header ----
+  ## _ Header ----
   dashboardHeader(title = "MADC Dashboard"),
   
-  ## Sidebar ----
+  ## _ Sidebar ----
   dashboardSidebar(
     sidebarMenu(
-      menuItem(text = "Summary", tabName = "summary", icon = icon("table")),
-      menuItem(text = "Timelines", tabName = "timelines", icon = icon("clock-o")),
-      menuItem(text = "Plots", tabName = "plots", icon = icon("signal")),
-      menuItem(text = "Maps", tabName = "maps", icon = icon("map"))
+      menuItem(text = "Summary", tabName = "summary", 
+               icon = icon("table")),
+      menuItem(text = "Timelines", tabName = "timelines", 
+               icon = icon("clock-o")),
+      menuItem(text = "Plots", tabName = "plots", 
+               icon = icon("signal")),
+      menuItem(text = "Maps", tabName = "maps", 
+               icon = icon("map")),
+      menuItem(text = "Characterization", tabName = "characterization",
+               icon = icon("medkit"))
     ) # end sidebarMenu
   ), # end dashboardSidebar
   
-  ## Body ----
+  ## _ Body ----
   dashboardBody(
     ## Set colors of font awesome icons
     tags$style(".fa-dashboard {color:#064193}"),
     tags$style(".fa-tint {color:#064193}"),
     tags$style(".fa-magnet {color:#064193}"),
     
-    ## Tab container ---
+    ## _ _ Tab container ----
     tabItems(
-      tabItem( # start tabItem for summary tables
+      tabItem( # _ _ _ Tab for summary tables ----
         tabName = "summary",
         h2("Summary Tables"),
-        fluidRow( # start fluidRow for valueBoxes
-          # valueBox 1,2,3 here
-        ), # end fluidRow for valueBoxes
+        # fluidRow( # start fluidRow for valueBoxes
+        #   # valueBox 1,2,3 here
+        # ), # end fluidRow for valueBoxes
         fluidRow( box(width = 12, h3("UDS Version"), 
                       DT::dataTableOutput("uds_vers")) ), 
         fluidRow( box(width = 12, h3("Sex"), 
@@ -100,54 +106,54 @@ ui <- dashboardPage(
                       DT::dataTableOutput("sex_mri_yes")) ),
         fluidRow( box(width = 12, h3("Race + MRI Yes"),
                       DT::dataTableOutput("race_mri_yes")) )
-      ), # end tabItem for summary tables
-      tabItem( # start tabItem for timeline tables/plots
+      ),
+      tabItem( # _ _ _ Tab for timeline tables/plots ----
         tabName = "timelines",
         h2("Timelines"),
         fluidRow( 
           box(width = 12, h3("Participant Timelines"),
               DT::dataTableOutput("timeline")) ),
         fluidRow(
-          box(width = 6, h3("Visit to Scored"),
+          box(width = 6, height = 350, h3("Visit to Scored"),
               plotOutput(outputId = "plot_timeline_exam_scored_hist")),
-          box(width = 6, h3("Visit to Double Scored"),
+          box(width = 6, height = 350, h3("Visit to Double Scored"),
               plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
         ),
         fluidRow(
-          box(width = 6, h3("Visit to First Consensus"),
+          box(width = 6, height = 350, h3("Visit to First Consensus"),
               plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
-          box(width = 6, h3("Final Consensus to Feedback"),
+          box(width = 6, height = 350, h3("Final Consensus to Feedback"),
               plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
         )
       ),
-      tabItem( # start tabItem for plots
+      tabItem( # _ _ _ Tab for plots ----
         tabName = "plots",
         h2("Cumulative Enrollments"),
         fluidRow(
-          tabBox(
+          tabBox( # _ _ _ _ tabBox 1 for cumulative plots ----
             width = 12,
             title = "Cumulative Enrollments",
             id = "tabset_cumenroll",
             height = "550px",
-            tabPanel(
+            tabPanel( # _ _ _ _ _ tabPanel 1 -- Total plot ----
               title = "Total",
               box(width = 12,
                   plotOutput(outputId = "plot_cum_total"))
-            ), # end tabPanel 1 -- Total plot
-            tabPanel(
+            ),
+            tabPanel( # _ _ _ _ _ tabPanel 2 -- Sex plot ----
               title = "Sex",
               box(width = 12,
                   plotOutput(outputId = "plot_cum_sex"))
-            ), # end tabPanel 2 -- Sex plot
-            tabPanel(
+            ), 
+            tabPanel( # _ _ _ _ _ tabPanel 3 -- Race plot ----
               title = "Race",
               box(width = 12,
                   plotOutput(outputId = "plot_cum_race"))
-            ) # end tabPanel 3 -- Race plot
-          ) # end tabBox 1 for cumulative plots
+            ) 
+          )
         ),
         fluidRow(
-          box( # start box 1 for date range input (cumulative)
+          box( # _ _ _ _ box 1 for date range input (cumulative) ----
             width = 12,
             dateRangeInput(inputId = "dateRange1",
                            label = "Date range input: yyyy-mm-dd",
@@ -155,30 +161,30 @@ ui <- dashboardPage(
           )
         ),
         fluidRow(
-          tabBox(
+          tabBox( # _ _ _ _ tabBox 2 for target diagnosis plots ----
             width = 12,
             title = "Target Enrollment by Diagnosis",
             id = "tabset_targenroll",
             height = "550px",
-            tabPanel("NL",
+            tabPanel("NL", # _ _ _ _ _ tabPanel 1 -- NL ----
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_nl"))),
-            tabPanel("MCI",
+            tabPanel("MCI", # _ _ _ _ _ tabPanel 1 -- MCI ----
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_mci"))),
-            tabPanel("AD",
+            tabPanel("AD", # _ _ _ _ _ tabPanel 1 -- AD ----
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_ad"))),
-            tabPanel("LBD",
+            tabPanel("LBD", # _ _ _ _ _ tabPanel 1 -- LBD ----
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_lbd"))),
-            tabPanel("FTD",
+            tabPanel("FTD", # _ _ _ _ _ tabPanel 1 -- FTD ----
                      box(width = 12,
                          plotOutput(outputId = "plot_cum_dx_target_ftd")))
-          ) # end tabBox 2 for target diagnosis plots
-        ), # end fluidRow for plots
+          ) 
+        ),
         fluidRow(
-          box( # start box 2 for date range input (diagnosis)
+          box( # _ _ _ _ box 2 for date range input (diagnosis) ----
             width = 12,
             dateRangeInput(inputId = "dateRange2",
                            label = "Date range input: yyyy-mm-dd",
@@ -186,9 +192,9 @@ ui <- dashboardPage(
                            end = as.Date("2022-03-01")
             )
           )
-        ) # end fluidRow for interactive dates
-      ), # end tabItem for plots
-      tabItem( # start tabItem for maps
+        ) 
+      ), 
+      tabItem( # _ _ _ Tab for maps ----
         tabName = "maps",
         h2("Maps"),
         fluidRow(
@@ -198,25 +204,49 @@ ui <- dashboardPage(
             id = "tabset_map",
             height = "700px",
             side = "left",
-            tabPanel(
+            tabPanel( # _ _ _ _ tabPanel 1 -- county map ----
               title = "County",
               box(
                 width = 12,
                 height = "625px",
                 plotOutput(outputId = "map_partic_by_county")
               )
-            ), # end tabPanel 1 -- county map
-            tabPanel(
+            ), 
+            tabPanel( # _ _ _ _ tabPanel 2 -- ZIP map ----
               title = "ZIP",
               box(
                 width = 12,
                 height = "625px",
                 plotOutput(outputId = "map_partic_by_zip")
               )
-            ) # end tabPanel 2 -- ZIP map
+            ) 
           ) # end tabBox
         ) # end fluidRow
-      ) # end tabItem for maps
+      ), # end tabItem for Maps
+      tabItem( # _ _ _ Tab for condition characterization ----
+        tabName = "characterization",
+        h2("Characterization"),
+        fluidRow(
+          box(
+            checkboxGroupInput(
+              inputId = "conditionsCheckboxes",
+              label = h3("Conditions"),
+              choices = list("Cancer" = "cancer", 
+                             "Diabetes" = "diabet", 
+                             "Hypertension" = "hypert",
+                             "Sleep Apnea" = "sleepap",
+                             "REM disorder" = "remdis",
+                             "Hyposomnia/Insomnia" = "hyposom")),
+            width = 12
+          )),
+        fluidRow(
+          box( 
+            verbatimTextOutput(
+              outputId = "value"), 
+            width = 12
+          )
+        )
+      ) # end tabItem for Characterization
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
@@ -306,7 +336,7 @@ server <- function(input, output, session) {
   }) # end `observe`
   
   # # # # # 
-  ## Render plots ----
+  ## Render enrollment plots ----
   
   ## Timeline - Visit to Score plot
   output$plot_timeline_exam_scored_hist <- renderPlot({
@@ -315,7 +345,7 @@ server <- function(input, output, session) {
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
-  })
+  }, height = 275)
   
   ## Timeline - Visit to Double Score plot
   output$plot_timeline_exam_dbl_scored_hist <- renderPlot({
@@ -324,7 +354,7 @@ server <- function(input, output, session) {
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
-  })
+  }, height = 275)
   
   ## Timeline - Visit to First Consensus plot
   output$plot_timeline_exam_consensus_dur_hist <- renderPlot({
@@ -333,7 +363,7 @@ server <- function(input, output, session) {
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
-  })
+  }, height = 275)
   
   ## Timeline - Final Consensus to Feedback plot
   output$plot_timeline_final_consensus_fb_hist <- renderPlot({
@@ -342,7 +372,7 @@ server <- function(input, output, session) {
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
-  })
+  }, height = 275)
   
   ## Cumulative enrollment totals plot
   output$plot_cum_total <- renderPlot({
@@ -394,7 +424,7 @@ server <- function(input, output, session) {
   }) # end observe
   
   # # # # # 
-  ## Render maps ----
+  ## Render enrollment maps ----
   
   ## Participation by county map
   county_max <- reactive({
@@ -422,7 +452,7 @@ server <- function(input, output, session) {
               subtitle = "March 2017 to Present")
   }, height = 600)
   
-  # ## Participation by ZIP map
+  ## Participation by ZIP map
   zip_max <- reactive({
     max(lst_map_dfs()$map_df_partic_ct_mi_zip$Count, na.rm = TRUE)
   })
@@ -453,6 +483,10 @@ server <- function(input, output, session) {
       ggtitle(label = "Participant Counts by ZIP Code",
               subtitle = "March 2017 to Present")
   }, height = 600)
+  
+  # # # # #
+  ## Render characterization plots ----
+  output$value <- renderPrint({ input$conditionsCheckboxes })
   
 }
 
