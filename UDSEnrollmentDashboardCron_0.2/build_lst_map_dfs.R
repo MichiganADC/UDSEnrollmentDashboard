@@ -18,7 +18,7 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
-data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
+data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 load(paste0(path_to_app, "mi_counties_list.Rdata"))
 
 # build_lst_map_dfs <- function(data) {

@@ -15,7 +15,7 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
-data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
+data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 source(paste0(path_to_app, "helper_fxns_plots.R"), local = TRUE)
 
 # build_data_plots <- function(data) {

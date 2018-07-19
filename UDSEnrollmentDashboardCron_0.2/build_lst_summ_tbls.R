@@ -12,7 +12,7 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
-data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
+data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 source(paste0(path_to_app, "helper_fxns_summ_tbls.R"))
 
 # build_lst_summ_tbls <- function(data) {
@@ -113,6 +113,11 @@ lst_summ_cts$uds_blood_yes_cts <-
                           group_var_2 = quo(uds_version),
                           filter_var = quo(blood_drawn),
                           filter_var_string = "1. Yes")
+if (!("UDS 2/3" %in% names(lst_summ_cts$uds_blood_yes_cts))) {
+  lst_summ_cts$uds_blood_yes_cts$`UDS 2/3` <- NA_integer_ 
+} else if (!("UDS 3" %in% names(lst_summ_cts$uds_blood_yes_cts))) {
+  lst_summ_cts$uds_blood_yes_cts$`UDS 3` <- NA_integer_
+}
 
 # Race + Research: Autopsy Yes counts
 lst_summ_cts$race_autopsy_yes_cts <-
@@ -264,9 +269,6 @@ lst_summ_tbls <- lapply(lst_summ_tbls, function(tbl) {
 # # # # # 
 ## Rename some headers (generalize later) ----
 
-# summ_tbl <- summ_tbl %>%
-#   rename(`Autopsy Yes` = Total1, `Autopsy Considering` = Total2,
-#          `MRI Yes` = Total3, `Blood Drawn Yes` = Total4)
 lst_summ_tbls$rsrch_tbl <- lst_summ_tbls$rsrch_tbl %>% 
   rename(`Autopsy Yes` = Total1, `Autopsy Considering` = Total2,
          `MRI Yes` = Total3, `Blood Drawn Yes` = Total4)
@@ -275,7 +277,6 @@ lst_summ_tbls$uds_rsrch_tbl <- lst_summ_tbls$uds_rsrch_tbl %>%
          `UDS 2/3 Autopsy Consider` = `UDS 2/31`, `UDS 3 Autopsy Consider` = `UDS 31`,
          `UDS 2/3 MRI Yes` = `UDS 2/32`, `UDS 3 MRI Yes` = `UDS 32`,
          `UDS 2/3 Blood Yes` = `UDS 2/33`, `UDS 3 Blood Yes` = `UDS 33`)
-
 
 # # # # # 
 ## Return `lst_summ_tbls` ---

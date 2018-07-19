@@ -11,7 +11,7 @@
 # USEFUL VARS ----
 
 `%>%` <- magrittr::`%>%`
-deployed <- FALSE
+deployed <- TRUE
 
 if (deployed) {
   path_to_app <- # Michigan Medicine R Shiny server
@@ -103,6 +103,30 @@ df_uds2 <-
 # _ UDS 3.0 data ----
 # _ _ Dx data (clin. pheno. + etiology) ----
 # _ _ Condx data ----
+condx_vctr <- c(
+  # D2 - Initial visits
+  'cancer',       # Condx -- Cancer
+  'diabet',       # Condx -- Diabetes
+  'myoinf',       # Condx -- Myocardial infarction
+  'conghrt',      # Condx -- Congestive heart failure
+  'hypert',       # Condx -- Hypertension
+  'hypchol',      # Condx -- Hypercholesterolemia
+  'arth',         # Condx -- Arthritis
+  'sleepap',      # Condx -- Sleep apnea
+  'remdis',       # Condx -- REM sleep behavior disorder
+  'hyposom',      # Condx -- Hyposomnia / insomnia
+  # D2 - Follow-up visits
+  'fu_cancer',    # Condx -- Cancer
+  'fu_diabet',    # Condx -- Diabetes
+  'fu_myoinf',    # Condx -- Myocardial infarction
+  'fu_conghrt',   # Condx -- Congestive heart failure
+  'fu_hypert',    # Condx -- Hypertension
+  'fu_hypchol',   # Condx -- Hypercholesterolemia
+  'fu_arth',      # Condx -- Arthritis
+  'fu_sleepap',   # Condx -- Sleep apnea
+  'fu_remdis',    # Condx -- REM sleep behavior disorder
+  'fu_hyposom'    # Condx -- Hyposomnia / insomnia
+)
 fields_uds3 <- c('ptid',         # partic. ID
                  'form_date',    # visit date
                  # D1 - Initial visits
@@ -145,14 +169,7 @@ fields_uds3 <- c('ptid',         # partic. ID
                  'fu_ftldmoif',  # Dx -- FTD
                  'fu_ftldnos',   # Dx -- FTD
                  'fu_ftldnoif',  # Dx -- FTD
-                 # D2 - Initial visits
-                 'diabet',       # Condx -- Diabetes
-                 'hypert',       # Condx -- Hypertension
-                 'sleepap',      # Condx -- Sleep apnea
-                 # D2 - Follow-up visits
-                 'fu_diabet',    # Condx -- Diabetest
-                 'fu_hypert',    # Condx -- Hyptension
-                 'fu_sleepap'    # Condx -- Sleep apnea
+                 condx_vctr      # Condx (10, initial & follow-up)
                  ) %>% paste(collapse = ',')
 json_uds3 <- RCurl::postForm(
   uri=API_URL,
@@ -210,25 +227,43 @@ ms_dx <- df_ms_xfrm %>%
   dplyr::select(subject_id, exam_date)
 uds3_dx <- df_uds3 %>% 
   dplyr::select(ptid, form_date, uds_dx, 
-                diabet, hypert, sleepap,
-                fu_diabet, fu_hypert, fu_sleepap) %>% 
+                condx_vctr) %>% 
   dplyr::rename(subject_id = ptid,
                 exam_date = form_date)
 ms_uds3_dx <- dplyr::left_join(ms_dx, 
                                uds3_dx, 
                                by = c("subject_id", "exam_date"))
 df_ms_xfrm$uds_dx <- ms_uds3_dx$uds_dx
-df_ms_xfrm[, c("diabet", "hypert", "sleepap", 
-                    "fu_diabet", "fu_hypert", "fu_sleepap")] <-
-  ms_uds3_dx[, c("diabet", "hypert", "sleepap",
-                 "fu_diabet", "fu_hypert", "fu_sleepap")]
+df_ms_xfrm[, condx_vctr] <-
+  ms_uds3_dx[, condx_vctr]
 df_ms_xfrm <- df_ms_xfrm %>% 
   dplyr::mutate(
+    cancer = dplyr::case_when( # Cancer
+      cancer == "1" | cancer == "2" |
+        fu_cancer == "1" | fu_cancer == "2" ~ "1",
+      cancer == "0" | fu_cancer == "0" ~ "0",
+      is.na(cancer) | is.na(fu_cancer) ~ "0",
+      TRUE ~ "0"
+    ),
     diabet = dplyr::case_when( # Diabetes
       diabet == "1" | diabet == "2" |
         fu_diabet == "1" | fu_diabet == "2" ~ "1",
       diabet == "0" | fu_diabet == "0" ~ "0",
       is.na(diabet) | is.na(fu_diabet) ~ "0",
+      TRUE ~ "0"
+    ),
+    myoinf = dplyr::case_when( # Myocardial infarction
+      myoinf == "1" | myoinf == "2" |
+        fu_myoinf == "1" | fu_myoinf == "2" ~ "1",
+      myoinf == "0" | fu_myoinf == "0" ~ "0",
+      is.na(myoinf) | is.na(fu_myoinf) ~ "0",
+      TRUE ~ "0"
+    ),
+    conghrt = dplyr::case_when( # Congestive heart failure
+      conghrt == "1" | conghrt == "2" |
+        fu_conghrt == "1" | fu_conghrt == "2" ~ "1",
+      conghrt == "0" | fu_conghrt == "0" ~ "0",
+      is.na(conghrt) | is.na(fu_conghrt) ~ "0",
       TRUE ~ "0"
     ),
     hypert = dplyr::case_when( # Hypertension
@@ -237,12 +272,42 @@ df_ms_xfrm <- df_ms_xfrm %>%
       is.na(hypert) | is.na(fu_hypert) ~ "0",
       TRUE ~ "0"
     ),
+    hypchol = dplyr::case_when( # Hypercholesterolemia
+      hypchol == "1" | hypchol == "2" |
+        fu_hypchol == "1" | fu_hypchol == "2" ~ "1",
+      hypchol == "0" | fu_hypchol == "0" ~ "0",
+      is.na(hypchol) | is.na(fu_hypchol) ~ "0",
+      TRUE ~ "0"
+    ),
+    arth = dplyr::case_when( # Arthritis
+      arth == "1" | arth == "2" |
+        fu_arth == "1" | fu_arth == "2" ~ "1",
+      arth == "0" | fu_arth == "0" ~ "0",
+      is.na(arth) | is.na(fu_arth) ~ "0",
+      TRUE ~ "0"
+    ),
     sleepap = dplyr::case_when( # Sleep apnea
       sleepap == "1" | fu_sleepap == "1" ~ "1",
       sleepap == "0" | fu_sleepap == "0" ~ "0",
       is.na(sleepap) | is.na(fu_sleepap) ~ "0",
       TRUE ~ "0"
-    ))
+    ),
+    remdis = dplyr::case_when( # REM sleep behavior disorder
+      remdis == "1" | remdis == "2" |
+        fu_remdis == "1" | fu_remdis == "2" ~ "1",
+      remdis == "0" | fu_remdis == "0" ~ "0",
+      is.na(remdis) | is.na(fu_remdis) ~ "0",
+      TRUE ~ "0"
+    ),
+    hyposom = dplyr::case_when( # Hyposomnia / insomnia
+      hyposom == "1" | hyposom == "2" |
+        fu_hyposom == "1" | fu_hyposom == "2" ~ "1",
+      hyposom == "0" | fu_hyposom == "0" ~ "0",
+      is.na(hyposom) | is.na(fu_hyposom) ~ "0",
+      TRUE ~ "0"
+    )
+  )
+df_ms_xfrm <- df_ms_xfrm[, !(names(df_ms_xfrm) %in% condx_vctr[11:20])]
 # readr::write_csv(ms_uds3_dx, "ms_uds3_dx.csv", na = "")
 
 # # # # #  

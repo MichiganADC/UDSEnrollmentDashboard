@@ -14,7 +14,7 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/" # local
 }
 
-data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
+data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 source(paste0(path_to_app, "helper_fxns_summ_tbls.R"))
 # source(paste0(path_to_app, "helper_fxns_timeline_tbls.R"))
 

@@ -1,7 +1,11 @@
 # app.R
 
+# # # # #
+# Copy all files to R Shiny server ----
+# scp ~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/* ldmay@rshiny.umms.med.umich.edu:~/ShinyApps/MADCDashboard/
+
 # # # # # 
-## Load libraries ---- 
+# Load libraries ---- 
 
 package.list <- c("shiny", "shinydashboard", "DT", "ggplot2", "RCurl", 
                   "jsonlite", "dplyr", "tidyr", "lubridate", "forcats",
@@ -29,7 +33,7 @@ library(maps)
 library(mapdata)
 library(zipcode)
 
-deployed <- FALSE
+deployed <- TRUE
 dt_options <- list(paging = FALSE,
                    searching = FALSE,
                    ordering = FALSE,
@@ -70,7 +74,7 @@ ui <- dashboardPage(
                icon = icon("signal")),
       menuItem(text = "Maps", tabName = "maps", 
                icon = icon("map")),
-      menuItem(text = "Characterization", tabName = "characterization",
+      menuItem(text = "Conditions", tabName = "condx",
                icon = icon("medkit"))
     ) # end sidebarMenu
   ), # end dashboardSidebar
@@ -85,168 +89,212 @@ ui <- dashboardPage(
     ## _ _ Tab container ----
     tabItems(
       tabItem( # _ _ _ Tab for summary tables ----
-        tabName = "summary",
-        h2("Summary Tables"),
-        # fluidRow( # start fluidRow for valueBoxes
-        #   # valueBox 1,2,3 here
-        # ), # end fluidRow for valueBoxes
-        fluidRow( box(width = 12, h3("UDS Version"), 
-                      DT::dataTableOutput("uds_vers")) ), 
-        fluidRow( box(width = 12, h3("Sex"), 
-                      DT::dataTableOutput("sex")) ), 
-        fluidRow( box(width = 12, h3("Race"),
-                      DT::dataTableOutput("race")) ), 
-        fluidRow( box(width = 12, h3("Research"),
-                      DT::dataTableOutput("rsrch")) ), 
-        fluidRow( box(width = 12, h3("Sex + Race"),
-                      DT::dataTableOutput("sex_race")) ), 
-        fluidRow( box(width = 12, h3("UDS Version + Research"),
-                      DT::dataTableOutput("uds_rsrch")) ), 
-        fluidRow( box(width = 12, h3("Sex + MRI Yes"),
-                      DT::dataTableOutput("sex_mri_yes")) ),
-        fluidRow( box(width = 12, h3("Race + MRI Yes"),
-                      DT::dataTableOutput("race_mri_yes")) )
+               tabName = "summary",
+               h2("Summary Tables"),
+               fluidRow( box(width = 12, h3("UDS Version"), 
+                             DT::dataTableOutput("uds_vers")) ), 
+               fluidRow( box(width = 12, h3("Sex"), 
+                             DT::dataTableOutput("sex")) ), 
+               fluidRow( box(width = 12, h3("Race"),
+                             DT::dataTableOutput("race")) ), 
+               fluidRow( box(width = 12, h3("Research"),
+                             DT::dataTableOutput("rsrch")) ), 
+               fluidRow( box(width = 12, h3("Sex + Race"),
+                             DT::dataTableOutput("sex_race")) ), 
+               fluidRow( box(width = 12, h3("UDS Version + Research"),
+                             DT::dataTableOutput("uds_rsrch")) ), 
+               fluidRow( box(width = 12, h3("Sex + MRI Yes"),
+                             DT::dataTableOutput("sex_mri_yes")) ),
+               fluidRow( box(width = 12, h3("Race + MRI Yes"),
+                             DT::dataTableOutput("race_mri_yes")) )
       ),
       tabItem( # _ _ _ Tab for timeline tables/plots ----
-        tabName = "timelines",
-        h2("Timelines"),
-        fluidRow( 
-          box(width = 12, h3("Participant Timelines"),
-              DT::dataTableOutput("timeline")) ),
-        fluidRow(
-          box(width = 6, height = 350, h3("Visit to Scored"),
-              plotOutput(outputId = "plot_timeline_exam_scored_hist")),
-          box(width = 6, height = 350, h3("Visit to Double Scored"),
-              plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
-        ),
-        fluidRow(
-          box(width = 6, height = 350, h3("Visit to First Consensus"),
-              plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
-          box(width = 6, height = 350, h3("Final Consensus to Feedback"),
-              plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
-        )
+               tabName = "timelines",
+               h2("Timelines"),
+               fluidRow( 
+                 box(width = 12, h3("Participant Timelines"),
+                     DT::dataTableOutput("timeline")) ),
+               fluidRow(
+                 box(width = 6, height = 350, h3("Visit to Scored"),
+                     plotOutput(outputId = "plot_timeline_exam_scored_hist")),
+                 box(width = 6, height = 350, h3("Visit to Double Scored"),
+                     plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
+               ),
+               fluidRow(
+                 box(width = 6, height = 350, h3("Visit to First Consensus"),
+                     plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
+                 box(width = 6, height = 350, h3("Final Consensus to Feedback"),
+                     plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
+               )
       ),
       tabItem( # _ _ _ Tab for plots ----
-        tabName = "plots",
-        h2("Cumulative Enrollments"),
-        fluidRow(
-          tabBox( # _ _ _ _ tabBox 1 for cumulative plots ----
-            width = 12,
-            title = "Cumulative Enrollments",
-            id = "tabset_cumenroll",
-            height = "550px",
-            tabPanel( # _ _ _ _ _ tabPanel 1 -- Total plot ----
-              title = "Total",
-              box(width = 12,
-                  plotOutput(outputId = "plot_cum_total"))
-            ),
-            tabPanel( # _ _ _ _ _ tabPanel 2 -- Sex plot ----
-              title = "Sex",
-              box(width = 12,
-                  plotOutput(outputId = "plot_cum_sex"))
-            ), 
-            tabPanel( # _ _ _ _ _ tabPanel 3 -- Race plot ----
-              title = "Race",
-              box(width = 12,
-                  plotOutput(outputId = "plot_cum_race"))
-            ) 
-          )
-        ),
-        fluidRow(
-          box( # _ _ _ _ box 1 for date range input (cumulative) ----
-            width = 12,
-            dateRangeInput(inputId = "dateRange1",
-                           label = "Date range input: yyyy-mm-dd",
-                           start = as.Date("2017-03-01"), end = Sys.Date())
-          )
-        ),
-        fluidRow(
-          tabBox( # _ _ _ _ tabBox 2 for target diagnosis plots ----
-            width = 12,
-            title = "Target Enrollment by Diagnosis",
-            id = "tabset_targenroll",
-            height = "550px",
-            tabPanel("NL", # _ _ _ _ _ tabPanel 1 -- NL ----
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_nl"))),
-            tabPanel("MCI", # _ _ _ _ _ tabPanel 1 -- MCI ----
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_mci"))),
-            tabPanel("AD", # _ _ _ _ _ tabPanel 1 -- AD ----
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_ad"))),
-            tabPanel("LBD", # _ _ _ _ _ tabPanel 1 -- LBD ----
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_lbd"))),
-            tabPanel("FTD", # _ _ _ _ _ tabPanel 1 -- FTD ----
-                     box(width = 12,
-                         plotOutput(outputId = "plot_cum_dx_target_ftd")))
-          ) 
-        ),
-        fluidRow(
-          box( # _ _ _ _ box 2 for date range input (diagnosis) ----
-            width = 12,
-            dateRangeInput(inputId = "dateRange2",
-                           label = "Date range input: yyyy-mm-dd",
-                           start = as.Date("2017-03-01"),
-                           end = as.Date("2022-03-01")
-            )
-          )
-        ) 
+               tabName = "plots",
+               h2("Cumulative Enrollments"),
+               fluidRow(
+                 tabBox( # _ _ _ _ tabBox 1 for cumulative plots ----
+                         width = 12,
+                         title = "Cumulative Enrollments",
+                         id = "tabset_cumenroll",
+                         height = "550px",
+                         tabPanel( # _ _ _ _ _ tabPanel 1 -- Total plot ----
+                                   title = "Total",
+                                   box(width = 12,
+                                       plotOutput(outputId = "plot_cum_total"))
+                         ),
+                         tabPanel( # _ _ _ _ _ tabPanel 2 -- Sex plot ----
+                                   title = "Sex",
+                                   box(width = 12,
+                                       plotOutput(outputId = "plot_cum_sex"))
+                         ), 
+                         tabPanel( # _ _ _ _ _ tabPanel 3 -- Race plot ----
+                                   title = "Race",
+                                   box(width = 12,
+                                       plotOutput(outputId = "plot_cum_race"))
+                         ) 
+                 )
+               ),
+               fluidRow(
+                 box( # _ _ _ _ box 1 for date range input (cumulative) ----
+                      width = 12,
+                      dateRangeInput(inputId = "dateRange1",
+                                     label = "Date range input: yyyy-mm-dd",
+                                     start = as.Date("2017-03-01"), end = Sys.Date())
+                 )
+               ),
+               fluidRow(
+                 tabBox( # _ _ _ _ tabBox 2 for target diagnosis plots ----
+                         width = 12,
+                         title = "Target Enrollment by Diagnosis",
+                         id = "tabset_targenroll",
+                         height = "550px",
+                         tabPanel("NL", # _ _ _ _ _ tabPanel 1 -- NL ----
+                                  box(width = 12,
+                                      plotOutput(outputId = "plot_cum_dx_target_nl"))),
+                         tabPanel("MCI", # _ _ _ _ _ tabPanel 1 -- MCI ----
+                                  box(width = 12,
+                                      plotOutput(outputId = "plot_cum_dx_target_mci"))),
+                         tabPanel("AD", # _ _ _ _ _ tabPanel 1 -- AD ----
+                                  box(width = 12,
+                                      plotOutput(outputId = "plot_cum_dx_target_ad"))),
+                         tabPanel("LBD", # _ _ _ _ _ tabPanel 1 -- LBD ----
+                                  box(width = 12,
+                                      plotOutput(outputId = "plot_cum_dx_target_lbd"))),
+                         tabPanel("FTD", # _ _ _ _ _ tabPanel 1 -- FTD ----
+                                  box(width = 12,
+                                      plotOutput(outputId = "plot_cum_dx_target_ftd")))
+                 ) 
+               ),
+               fluidRow(
+                 box( # _ _ _ _ box 2 for date range input (diagnosis) ----
+                      width = 12,
+                      dateRangeInput(inputId = "dateRange2",
+                                     label = "Date range input: yyyy-mm-dd",
+                                     start = as.Date("2017-03-01"),
+                                     end = as.Date("2022-03-01")
+                      )
+                 )
+               ) 
       ), 
       tabItem( # _ _ _ Tab for maps ----
-        tabName = "maps",
-        h2("Maps"),
-        fluidRow(
-          tabBox(
-            width = 12,
-            title = "",
-            id = "tabset_map",
-            height = "700px",
-            side = "left",
-            tabPanel( # _ _ _ _ tabPanel 1 -- county map ----
-              title = "County",
-              box(
-                width = 12,
-                height = "625px",
-                plotOutput(outputId = "map_partic_by_county")
-              )
-            ), 
-            tabPanel( # _ _ _ _ tabPanel 2 -- ZIP map ----
-              title = "ZIP",
-              box(
-                width = 12,
-                height = "625px",
-                plotOutput(outputId = "map_partic_by_zip")
-              )
-            ) 
-          ) # end tabBox
-        ) # end fluidRow
+               tabName = "maps",
+               h2("Maps"),
+               fluidRow(
+                 tabBox(
+                   width = 12,
+                   title = "",
+                   id = "tabset_map",
+                   height = "700px",
+                   side = "left",
+                   tabPanel( # _ _ _ _ tabPanel 1 -- county map ----
+                             title = "County",
+                             box(
+                               width = 12,
+                               height = "625px",
+                               plotOutput(outputId = "map_partic_by_county")
+                             )
+                   ), 
+                   tabPanel( # _ _ _ _ tabPanel 2 -- ZIP map ----
+                             title = "ZIP",
+                             box(
+                               width = 12,
+                               height = "625px",
+                               plotOutput(outputId = "map_partic_by_zip")
+                             )
+                   ) 
+                 ) # end tabBox
+               ) # end fluidRow
       ), # end tabItem for Maps
-      tabItem( # _ _ _ Tab for condition characterization ----
-        tabName = "characterization",
-        h2("Characterization"),
-        fluidRow(
-          box(
-            checkboxGroupInput(
-              inputId = "conditionsCheckboxes",
-              label = h3("Conditions"),
-              choices = list("Cancer" = "cancer", 
-                             "Diabetes" = "diabet", 
-                             "Hypertension" = "hypert",
-                             "Sleep Apnea" = "sleepap",
-                             "REM disorder" = "remdis",
-                             "Hyposomnia/Insomnia" = "hyposom")),
-            width = 12
-          )),
-        fluidRow(
-          box( 
-            verbatimTextOutput(
-              outputId = "value"), 
-            width = 12
-          )
-        )
-      ) # end tabItem for Characterization
+      tabItem( # _ _ _ Tab for conditions ----
+               tabName = "condx",
+               h2("Conditions by Diagnosis"),
+               fluidRow(
+                 box(
+                   checkboxGroupInput(
+                     inputId = "condxCheckboxes",
+                     label = h3("Conditions"),
+                     inline = TRUE,
+                     choices = list("Cancer" = "cancer", 
+                                    "Diabetes" = "diabet", 
+                                    "Myocardial infarction" = "myoinf",
+                                    "Congestive heart failure" = "conghrt",
+                                    "Hypertension" = "hypert",
+                                    "Hypercholesterolemia" = "hypchol",
+                                    "Arthritis" = "arth",
+                                    "Sleep Apnea" = "sleepap",
+                                    "REM disorder" = "remdis",
+                                    "Hyposomnia/Insomnia" = "hyposom")),
+                   width = 12)
+               ),
+               # fluidRow(
+               #   box( verbatimTextOutput(outputId = "condx"), width = 12 )
+               # ),
+               # fluidRow(
+               #   box( verbatimTextOutput(outputId = "select_condx"), width = 12)
+               # ),
+               fluidRow(
+                 box(plotOutput(outputId = "plot_condx_nl"), 
+                     width = 6, title = h2("NL")),
+                 box(plotOutput(outputId = "plot_condx_mci"), 
+                     width = 6, title = h2("MCI"))
+               ),
+               fluidRow(
+                 box(plotOutput(outputId = "plot_condx_ad"), 
+                     width = 6, title = h2("AD")),
+                 box(plotOutput(outputId = "plot_condx_imp"), 
+                     width = 6, title = h2("Impaired, not MCI"))
+               ),
+               fluidRow(
+                 box(plotOutput(outputId = "plot_condx_ftd"),
+                     width = 6, title = h2("FTD")),
+                 box(plotOutput(outputId ="plot_condx_lbd"), 
+                     width = 6, title = h2("LBD"))
+               ),
+               fluidRow(
+                 box(plotOutput(outputId = "plot_condx_oth"), 
+                     width = 6, title = h2("Other")),
+                 box(plotOutput(outputId = "plot_condx_pnd"), 
+                     width = 6, title = h2("Pending consensus"))
+               ),
+               # fluidRow(
+               #   box( verbatimTextOutput(outputId = "select_name_vctr"),
+               #        width = 12),
+               #   box( verbatimTextOutput(outputId = "select_name_vctr_1"),
+               #        width = 12),
+               #   box( verbatimTextOutput(outputId = "select_name_vctr_2"),
+               #        width = 12),
+               #   box( verbatimTextOutput(outputId = "select_name_vctr_3"),
+               #        width = 12),
+               #   box( verbatimTextOutput(outputId = "select_condx_combn"),
+               #        width = 12)
+               # ),
+               fluidRow( 
+                 # box( verbatimTextOutput(outputId = "select_name_vctr_length"), 
+                 #      width = 12),
+                 box(h3("Selected Conditions"),
+                     DT::dataTableOutput("data_condx_select"),
+                     width = 12)
+               )
+      ) # end tabItem for condx
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
@@ -268,7 +316,7 @@ server <- function(input, output, session) {
   # data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
   data <- 
     reactiveFileReader(intervalMillis = invalidation_time,
-                       filePath = "./rds/df_mindset_xfrm.Rds",
+                       filePath = "./rds/df_ms_xfrm.Rds",
                        readFunc = readRDS,
                        session = NULL)
   
@@ -297,6 +345,13 @@ server <- function(input, output, session) {
   lst_map_dfs <-
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/lst_map_dfs.Rds",
+                       readFunc = readRDS,
+                       session = NULL)
+  
+  ## df for condx
+  data_condx <-
+    reactiveFileReader(intervalMillis = invalidation_time,
+                       filePath = "./rds/data_condx.Rds",
                        readFunc = readRDS,
                        session = NULL)
   
@@ -485,8 +540,124 @@ server <- function(input, output, session) {
   }, height = 600)
   
   # # # # #
-  ## Render characterization plots ----
-  output$value <- renderPrint({ input$conditionsCheckboxes })
+  ## Render condx plots ----
+  output$condx <- renderPrint({ input$condxCheckboxes })
+  
+  select_condx <- reactive({ as.character(unlist(input$condxCheckboxes)) })
+  output$select_condx <- renderPrint({ select_condx() })
+  
+  # Get/parse user condx selections
+  select_condx_combn <- reactive({
+    purrr::map(
+      0:length(select_condx()), 
+      function(x) { combn(select_condx(), x, simplify = TRUE) })
+  })
+  select_name_vctr <- reactive({ 
+    purrr::map(
+      select_condx_combn(), 
+      function(x) {
+        x <- as.data.frame(x)
+        purrr::map_chr(
+          x,
+          function(y) {
+            paste(y, collapse = "_") 
+          })
+      })
+  })
+  select_name_vctr_1 <- reactive({ 
+    if (length(select_name_vctr()) > 1) {
+      c("nullcond", select_name_vctr()[2:length(select_name_vctr())]) 
+    } else {
+      c("nullcond")
+    }
+  })
+  select_name_vctr_2 <- reactive({
+    unlist(select_name_vctr_1())
+  })
+  select_name_vctr_3 <- reactive({
+    unname(select_name_vctr_2())
+  })
+  
+  output$select_name_vctr   <- renderPrint({ select_name_vctr() })
+  output$select_name_vctr_1 <- renderPrint({ select_name_vctr_1() })
+  output$select_name_vctr_2 <- renderPrint({ select_name_vctr_2() })
+  output$select_name_vctr_3 <- renderPrint({ select_name_vctr_3() })
+  # output$select_condx_combn <- renderPrint({ select_condx_combn() })
+  
+  # Condx x Dx table
+  # output$select_name_vctr_length <- renderPrint({ length(select_name_vctr_3()) })
+  select_data_condx <- reactive({
+    if (length(input$condxCheckboxes) == 0) {
+      return( subset(data_condx(), select = c("uds_dx", "nullcond")) )
+    } else {
+      return( subset(data_condx(), select = c("uds_dx", select_name_vctr_3())) )
+    }
+  })
+  output$data_condx_select <- DT::renderDataTable({
+    DT::datatable( select_data_condx(), options = dt_options )
+  })
+  
+  # Pie graphs
+  # slices
+  slice_nl <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "NL",
+                       select = select_name_vctr_3()) )
+  })
+  slice_mci <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "MCI",
+                       select = select_name_vctr_3()) )
+  })
+  slice_ad <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "AD", 
+                       select = select_name_vctr_3()) )
+  })
+  slice_imp <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "Impaired, not MCI",
+                       select = select_name_vctr_3()) )
+  })
+  slice_ftd <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "FTD",
+                       select = select_name_vctr_3()) )
+  })
+  slice_lbd <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "LBD",
+                       select = select_name_vctr_3()) )
+  })
+  slice_oth <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "Other",
+                       select = select_name_vctr_3()) )
+  })
+  slice_pnd <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "Pending consensus",
+                       select = select_name_vctr_3()) )
+  })
+  
+  # plots
+  output$plot_condx_nl <- renderPlot({ 
+    pie_graph(slice_nl(), select_name_vctr_3())
+  })
+  output$plot_condx_mci <- renderPlot({
+    pie_graph(slice_mci(), select_name_vctr_3())
+  })
+  output$plot_condx_ad <- renderPlot({
+    pie_graph(slice_ad(), select_name_vctr_3())
+  })
+  output$plot_condx_imp <- renderPlot({
+    pie_graph(slice_imp(), select_name_vctr_3())
+  })
+  output$plot_condx_ftd <- renderPlot({
+    pie_graph(slice_ftd(), select_name_vctr_3())
+  })
+  output$plot_condx_lbd <- renderPlot({
+    pie_graph(slice_lbd(), select_name_vctr_3())
+  })
+  output$plot_condx_oth <- renderPlot({
+    pie_graph(slice_oth(), select_name_vctr_3())
+  })
+  output$plot_condx_pnd <- renderPlot({
+    pie_graph(slice_pnd(), select_name_vctr_3())
+  })
+  
   
 }
 
