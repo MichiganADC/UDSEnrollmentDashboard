@@ -105,13 +105,14 @@ add_dx_target_rows <- function(df, dx, dx_target, annual_targets) {
 # Fxn to abstract away work of drawing pie charts (plots)
 pie_graph <- function(slice_dx, select_name_vctr) {
   par(mar = rep(0, 4))
+  slice_dx_sum <- sum(slice_dx)
   if (any(as.logical(slice_dx))) {
     pie(x = slice_dx[as.logical(slice_dx)], 
-        labels = paste(select_name_vctr[as.logical(slice_dx)], 
-                       slice_dx[as.logical(slice_dx)]),
-        # main = "NL", 
+        labels = paste(paste0(select_name_vctr[as.logical(slice_dx)], ", "), 
+                       paste0("n=", slice_dx[as.logical(slice_dx)], ", "),
+                       paste0(round(slice_dx / slice_dx_sum * 100)[as.logical(slice_dx)], "%")),
         col = rainbow(length(slice_dx[as.logical(slice_dx)])), 
-        clockwise = TRUE)
+        clockwise = TRUE, init.angle = 180, radius = 0.9)
   }
 }
 

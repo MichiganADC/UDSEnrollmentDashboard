@@ -13,6 +13,8 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/"
 }
 
+source("helper_fxns_summ_tbls.R")
+
 # **** ----
 # GET DATA ----
 
@@ -117,6 +119,7 @@ condx_dx_sums <- data %>%
                       .vars = dplyr::vars(condx_combn_vctr[1:length(condx_combn_vctr)]),
                       .funs = dplyr::funs(sum))
 
+condx_dx_sums <- add_totals_row(condx_dx_sums)
 
 # **** ----
 # WRITE TO RDS ----

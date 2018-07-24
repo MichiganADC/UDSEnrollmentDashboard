@@ -65,6 +65,8 @@ ui <- dashboardPage(
   
   ## _ Sidebar ----
   dashboardSidebar(
+    tags$style("ul {margin:0px;padding-left:12px;}"),
+    tags$style("p {padding:0px;line-height:0.8;}"),
     sidebarMenu(
       menuItem(text = "Summary", tabName = "summary", 
                icon = icon("table")),
@@ -76,37 +78,108 @@ ui <- dashboardPage(
                icon = icon("map")),
       menuItem(text = "Conditions", tabName = "condx",
                icon = icon("medkit"))
-    ) # end sidebarMenu
+    ), # end sidebarMenu
+    box(
+      tags$div(class = "header", checked = NA,
+               tags$p("Links"),
+               tags$ul(
+                 tags$li(
+                   tags$a(href="http://alzheimers.med.umich.edu/", 
+                          "Michigan Alzheimer's Disease Center",
+                          target="_blank")),
+                 tags$li(
+                   tags$a(href="https://umich.qualtrics.com/jfe/form/SV_b1TndWfpnIyyGd7", 
+                          "Data Request Form",
+                          target="_blank")) #,
+                 # tags$li(
+                 #   tags$a(href="http://alzheimers.med.umich.edu/", 
+                 #          "Michigan Alzheimer's Disease Center"))
+               )
+      ),
+      width = 12, background = "black"
+    )
+    
   ), # end dashboardSidebar
   
   ## _ Body ----
   dashboardBody(
+    
     ## Set colors of font awesome icons
-    tags$style(".fa-dashboard {color:#064193}"),
-    tags$style(".fa-tint {color:#064193}"),
-    tags$style(".fa-magnet {color:#064193}"),
+    # tags$style(".fa-dashboard {color:#064193}"),
+    # tags$style(".fa-tint {color:#064193}"),
+    # tags$style(".fa-magnet {color:#064193}"),
+    ## Set h2 css style
+    tags$style("h2 {padding-top:0px;margin-top:0px;}"),
     
     ## _ _ Tab container ----
     tabItems(
       tabItem( # _ _ _ Tab for summary tables ----
                tabName = "summary",
                h2("Summary Tables"),
-               fluidRow( box(width = 12, h3("UDS Version"), 
-                             DT::dataTableOutput("uds_vers")) ), 
-               fluidRow( box(width = 12, h3("Sex"), 
-                             DT::dataTableOutput("sex")) ), 
-               fluidRow( box(width = 12, h3("Race"),
-                             DT::dataTableOutput("race")) ), 
-               fluidRow( box(width = 12, h3("Research"),
-                             DT::dataTableOutput("rsrch")) ), 
-               fluidRow( box(width = 12, h3("Sex + Race"),
-                             DT::dataTableOutput("sex_race")) ), 
-               fluidRow( box(width = 12, h3("UDS Version + Research"),
-                             DT::dataTableOutput("uds_rsrch")) ), 
-               fluidRow( box(width = 12, h3("Sex + MRI Yes"),
-                             DT::dataTableOutput("sex_mri_yes")) ),
-               fluidRow( box(width = 12, h3("Race + MRI Yes"),
-                             DT::dataTableOutput("race_mri_yes")) )
+               fluidRow( 
+                 box(width = 12, h3("UDS Version"), 
+                     DT::dataTableOutput("uds_vers"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "uds_vers_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("Sex"), 
+                     DT::dataTableOutput("sex"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "sex_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("Race"),
+                     DT::dataTableOutput("race"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "race_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("Research"),
+                     DT::dataTableOutput("rsrch"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "rsrch_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("Sex + Race"),
+                     DT::dataTableOutput("sex_race"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "sex_race_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("UDS Version + Research"),
+                     DT::dataTableOutput("uds_rsrch"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "uds_rsrch_dl",
+                                        label = "Download"),
+                         width = 12))) ), 
+               fluidRow( 
+                 box(width = 12, h3("Sex + MRI Yes"),
+                     DT::dataTableOutput("sex_mri_yes"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "sex_mri_yes_dl",
+                                        label = "Download"),
+                         width = 12))) ),
+               fluidRow( 
+                 box(width = 12, h3("Race + MRI Yes"),
+                     DT::dataTableOutput("race_mri_yes"),
+                     fluidRow(
+                       box(
+                         downloadButton(outputId = "race_mri_yes_dl",
+                                        label = "Download"),
+                         width = 12))) )
       ),
       tabItem( # _ _ _ Tab for timeline tables/plots ----
                tabName = "timelines",
@@ -252,6 +325,10 @@ ui <- dashboardPage(
                #   box( verbatimTextOutput(outputId = "select_condx"), width = 12)
                # ),
                fluidRow(
+                 box(plotOutput(outputId = "plot_condx_all"),
+                     width = 12, title = h2("All Diagnoses"))
+               ),
+               fluidRow(
                  box(plotOutput(outputId = "plot_condx_nl"), 
                      width = 6, title = h2("NL")),
                  box(plotOutput(outputId = "plot_condx_mci"), 
@@ -377,6 +454,29 @@ server <- function(input, output, session) {
   # })
   
   # # # # #
+  ## Link summary table download buttons ----
+  observe({
+    lapply(summ_tbl_names, function(tbl_name) {
+      output[[paste0(tbl_name, "_dl")]] <- downloadHandler(
+        filename = function() { paste0(tbl_name, "_dl.csv") },
+        content = function(file) {
+          write.table(lst_summ_tbls()[[paste0(tbl_name, "_tbl")]], 
+                      file, sep = ",", row.names = FALSE, na = "")
+        }
+      )
+    })
+  })
+  
+  ## Example of single download button
+  # output$uds_vers_dl <- downloadHandler(
+  #   filename = function() { paste("uds_vers_dl.csv") },
+  #   content = function(file) {
+  #     write.table(lst_summ_tbls()$uds_vers, file, sep = ",", row.names = FALSE)
+  #   }
+  # )
+  
+  
+  # # # # #
   ## Render timeline tables ----
   
   ## Use `observe` + `lapply` to render all the summary tables
@@ -489,8 +589,8 @@ server <- function(input, output, session) {
     lst_map_dfs()$mi_base_map +
       geom_polygon(data = lst_map_dfs()$map_df_partic_ct_mi_county,
                    aes(fill = Count),
-                   color = "black", size = 0.1) +
-      geom_polygon(color = "black", fill = NA) +
+                   color = "black", size = 0.25) +
+      geom_polygon(color = "black", size = 0.25, fill = NA) +
       theme_bw() +
       theme(
         axis.text = element_blank(),
@@ -502,7 +602,7 @@ server <- function(input, output, session) {
       ) +
       scale_fill_continuous(low = "#eeeeee", high = "royalblue",
                             breaks = seq(1, county_max(),
-                                         by = (county_max()-1)/5)) +
+                                         by = round((county_max()-1)/5))) +
       ggtitle(label = "Participant Counts by County",
               subtitle = "March 2017 to Present")
   }, height = 600)
@@ -518,7 +618,7 @@ server <- function(input, output, session) {
                      size = Count,
                      fill = Count),
                  color = "black", pch = 21) +
-      geom_polygon(color = "black", fill = NA) +
+      geom_polygon(color = "black", size = 0.25, fill = NA) +
       theme_bw() +
       theme(
         axis.text = element_blank(),
@@ -564,24 +664,18 @@ server <- function(input, output, session) {
           })
       })
   })
-  select_name_vctr_1 <- reactive({ 
+  select_name_vctr_3 <- reactive({
     if (length(select_name_vctr()) > 1) {
-      c("nullcond", select_name_vctr()[2:length(select_name_vctr())]) 
+      unname(unlist(c("nullcond", select_name_vctr()[2:length(select_name_vctr())])))
     } else {
-      c("nullcond")
+      unname(unlist(c("nullcond")))
     }
   })
-  select_name_vctr_2 <- reactive({
-    unlist(select_name_vctr_1())
-  })
-  select_name_vctr_3 <- reactive({
-    unname(select_name_vctr_2())
-  })
   
-  output$select_name_vctr   <- renderPrint({ select_name_vctr() })
-  output$select_name_vctr_1 <- renderPrint({ select_name_vctr_1() })
-  output$select_name_vctr_2 <- renderPrint({ select_name_vctr_2() })
-  output$select_name_vctr_3 <- renderPrint({ select_name_vctr_3() })
+  # output$select_name_vctr   <- renderPrint({ select_name_vctr() })
+  # output$select_name_vctr_1 <- renderPrint({ select_name_vctr_1() })
+  # output$select_name_vctr_2 <- renderPrint({ select_name_vctr_2() })
+  # output$select_name_vctr_3 <- renderPrint({ select_name_vctr_3() })
   # output$select_condx_combn <- renderPrint({ select_condx_combn() })
   
   # Condx x Dx table
@@ -599,6 +693,10 @@ server <- function(input, output, session) {
   
   # Pie graphs
   # slices
+  slice_all <- reactive({
+    as.integer( subset(select_data_condx(), uds_dx == "Totals",
+                       select = select_name_vctr_3()) )
+  })
   slice_nl <- reactive({
     as.integer( subset(select_data_condx(), uds_dx == "NL",
                        select = select_name_vctr_3()) )
@@ -633,6 +731,9 @@ server <- function(input, output, session) {
   })
   
   # plots
+  output$plot_condx_all <- renderPlot({
+    pie_graph(slice_all(), select_name_vctr_3())
+  })
   output$plot_condx_nl <- renderPlot({ 
     pie_graph(slice_nl(), select_name_vctr_3())
   })
