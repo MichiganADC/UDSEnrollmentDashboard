@@ -76,7 +76,7 @@ ui <- dashboardPage(
                icon = icon("signal")),
       menuItem(text = "Maps", tabName = "maps", 
                icon = icon("map")),
-      menuItem(text = "Conditions", tabName = "condx",
+      menuItem(text = "Conditions", tabName = "condx_fast",
                icon = icon("medkit"))
     ), # end sidebarMenu
     box(
@@ -110,268 +110,257 @@ ui <- dashboardPage(
     # tags$style(".fa-magnet {color:#064193}"),
     ## Set h2 css style
     tags$style("h2 {padding-top:0px;margin-top:0px;}"),
+    tags$style("h6 {padding:0px;margin:0px;}"),
     
-    ## _ _ Tab container ----
+    # _ _ Tab container ----
     tabItems(
-      tabItem( # _ _ _ Tab for summary tables ----
-               tabName = "summary",
-               h2("Summary Tables"),
-               fluidRow( 
-                 box(width = 12, h3("UDS Version"), 
-                     DT::dataTableOutput("uds_vers"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "uds_vers_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("Sex"), 
-                     DT::dataTableOutput("sex"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "sex_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("Race"),
-                     DT::dataTableOutput("race"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "race_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("Research"),
-                     DT::dataTableOutput("rsrch"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "rsrch_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("Sex + Race"),
-                     DT::dataTableOutput("sex_race"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "sex_race_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("UDS Version + Research"),
-                     DT::dataTableOutput("uds_rsrch"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "uds_rsrch_dl",
-                                        label = "Download"),
-                         width = 12))) ), 
-               fluidRow( 
-                 box(width = 12, h3("Sex + MRI Yes"),
-                     DT::dataTableOutput("sex_mri_yes"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "sex_mri_yes_dl",
-                                        label = "Download"),
-                         width = 12))) ),
-               fluidRow( 
-                 box(width = 12, h3("Race + MRI Yes"),
-                     DT::dataTableOutput("race_mri_yes"),
-                     fluidRow(
-                       box(
-                         downloadButton(outputId = "race_mri_yes_dl",
-                                        label = "Download"),
-                         width = 12))) )
+      # _ _ _ Tab for summary tables ----
+      tabItem( 
+        tabName = "summary",
+        h2("Summary Tables"),
+        fluidRow( 
+          box(width = 12, h3("UDS Version"), 
+              DT::dataTableOutput("uds_vers"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "uds_vers_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("Sex"), 
+              DT::dataTableOutput("sex"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "sex_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("Race"),
+              DT::dataTableOutput("race"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "race_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("Research"),
+              DT::dataTableOutput("rsrch"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "rsrch_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("Sex + Race"),
+              DT::dataTableOutput("sex_race"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "sex_race_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("UDS Version + Research"),
+              DT::dataTableOutput("uds_rsrch"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "uds_rsrch_dl",
+                                 label = "Download"),
+                  width = 12))) ), 
+        fluidRow( 
+          box(width = 12, h3("Sex + MRI Yes"),
+              DT::dataTableOutput("sex_mri_yes"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "sex_mri_yes_dl",
+                                 label = "Download"),
+                  width = 12))) ),
+        fluidRow( 
+          box(width = 12, h3("Race + MRI Yes"),
+              DT::dataTableOutput("race_mri_yes"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "race_mri_yes_dl",
+                                 label = "Download"),
+                  width = 12))) )
       ),
-      tabItem( # _ _ _ Tab for timeline tables/plots ----
-               tabName = "timelines",
-               h2("Timelines"),
-               fluidRow( 
-                 box(width = 12, h3("Participant Timelines"),
-                     DT::dataTableOutput("timeline")) ),
-               fluidRow(
-                 box(width = 6, height = 350, h3("Visit to Scored"),
-                     plotOutput(outputId = "plot_timeline_exam_scored_hist")),
-                 box(width = 6, height = 350, h3("Visit to Double Scored"),
-                     plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
-               ),
-               fluidRow(
-                 box(width = 6, height = 350, h3("Visit to First Consensus"),
-                     plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
-                 box(width = 6, height = 350, h3("Final Consensus to Feedback"),
-                     plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
+      # _ _ _ Tab for timeline tables/plots ----
+      tabItem( 
+        tabName = "timelines",
+        h2("Timelines"),
+        fluidRow( 
+          box(width = 12, h3("Participant Timelines"),
+              DT::dataTableOutput("timeline"),
+              fluidRow(
+                box(
+                  tags$h6("* These values do not include weekend days."), 
+                  width = 12
+                )
+              )
+          ) 
+        ),
+        fluidRow(
+          box(width = 6, height = 350, h3("Visit to Scored"),
+              plotOutput(outputId = "plot_timeline_exam_scored_hist")),
+          box(width = 6, height = 350, h3("Visit to Double Scored"),
+              plotOutput(outputId = "plot_timeline_exam_dbl_scored_hist"))
+        ),
+        fluidRow(
+          box(width = 6, height = 350, h3("Visit to First Consensus"),
+              plotOutput(outputId = "plot_timeline_exam_consensus_dur_hist")),
+          box(width = 6, height = 350, h3("Final Consensus to Feedback"),
+              plotOutput(outputId = "plot_timeline_final_consensus_fb_hist"))
+        )
+      ),
+      # _ _ _ Tab for plots ----
+      tabItem( 
+        tabName = "plots",
+        h2("Cumulative Enrollments"),
+        fluidRow(
+          tabBox( # _ _ _ _ tabBox 1 for cumulative plots ----
+                  width = 12,
+                  title = "Cumulative Enrollments",
+                  id = "tabset_cumenroll",
+                  height = "550px",
+                  tabPanel( # _ _ _ _ _ tabPanel 1 -- Total plot ----
+                            title = "Total",
+                            box(width = 12,
+                                plotOutput(outputId = "plot_cum_total"))
+                  ),
+                  tabPanel( # _ _ _ _ _ tabPanel 2 -- Sex plot ----
+                            title = "Sex",
+                            box(width = 12,
+                                plotOutput(outputId = "plot_cum_sex"))
+                  ), 
+                  tabPanel( # _ _ _ _ _ tabPanel 3 -- Race plot ----
+                            title = "Race",
+                            box(width = 12,
+                                plotOutput(outputId = "plot_cum_race"))
+                  ) 
+          )
+        ),
+        fluidRow(
+          box( # _ _ _ _ box 1 for date range input (cumulative) ----
+               width = 12,
+               dateRangeInput(inputId = "dateRange1",
+                              label = "Date range input: yyyy-mm-dd",
+                              start = as.Date("2017-03-01"), end = Sys.Date())
+          )
+        ),
+        fluidRow(
+          tabBox( # _ _ _ _ tabBox 2 for target diagnosis plots ----
+                  width = 12,
+                  title = "Target Enrollment by Diagnosis",
+                  id = "tabset_targenroll",
+                  height = "550px",
+                  tabPanel("NL", # _ _ _ _ _ tabPanel 1 -- NL ----
+                           box(width = 12,
+                               plotOutput(outputId = "plot_cum_dx_target_nl"))),
+                  tabPanel("MCI", # _ _ _ _ _ tabPanel 1 -- MCI ----
+                           box(width = 12,
+                               plotOutput(outputId = "plot_cum_dx_target_mci"))),
+                  tabPanel("AD", # _ _ _ _ _ tabPanel 1 -- AD ----
+                           box(width = 12,
+                               plotOutput(outputId = "plot_cum_dx_target_ad"))),
+                  tabPanel("LBD", # _ _ _ _ _ tabPanel 1 -- LBD ----
+                           box(width = 12,
+                               plotOutput(outputId = "plot_cum_dx_target_lbd"))),
+                  tabPanel("FTD", # _ _ _ _ _ tabPanel 1 -- FTD ----
+                           box(width = 12,
+                               plotOutput(outputId = "plot_cum_dx_target_ftd")))
+          ) 
+        ),
+        fluidRow(
+          box( # _ _ _ _ box 2 for date range input (diagnosis) ----
+               width = 12,
+               dateRangeInput(inputId = "dateRange2",
+                              label = "Date range input: yyyy-mm-dd",
+                              start = as.Date("2017-03-01"),
+                              end = as.Date("2022-03-01")
                )
-      ),
-      tabItem( # _ _ _ Tab for plots ----
-               tabName = "plots",
-               h2("Cumulative Enrollments"),
-               fluidRow(
-                 tabBox( # _ _ _ _ tabBox 1 for cumulative plots ----
-                         width = 12,
-                         title = "Cumulative Enrollments",
-                         id = "tabset_cumenroll",
-                         height = "550px",
-                         tabPanel( # _ _ _ _ _ tabPanel 1 -- Total plot ----
-                                   title = "Total",
-                                   box(width = 12,
-                                       plotOutput(outputId = "plot_cum_total"))
-                         ),
-                         tabPanel( # _ _ _ _ _ tabPanel 2 -- Sex plot ----
-                                   title = "Sex",
-                                   box(width = 12,
-                                       plotOutput(outputId = "plot_cum_sex"))
-                         ), 
-                         tabPanel( # _ _ _ _ _ tabPanel 3 -- Race plot ----
-                                   title = "Race",
-                                   box(width = 12,
-                                       plotOutput(outputId = "plot_cum_race"))
-                         ) 
-                 )
-               ),
-               fluidRow(
-                 box( # _ _ _ _ box 1 for date range input (cumulative) ----
-                      width = 12,
-                      dateRangeInput(inputId = "dateRange1",
-                                     label = "Date range input: yyyy-mm-dd",
-                                     start = as.Date("2017-03-01"), end = Sys.Date())
-                 )
-               ),
-               fluidRow(
-                 tabBox( # _ _ _ _ tabBox 2 for target diagnosis plots ----
-                         width = 12,
-                         title = "Target Enrollment by Diagnosis",
-                         id = "tabset_targenroll",
-                         height = "550px",
-                         tabPanel("NL", # _ _ _ _ _ tabPanel 1 -- NL ----
-                                  box(width = 12,
-                                      plotOutput(outputId = "plot_cum_dx_target_nl"))),
-                         tabPanel("MCI", # _ _ _ _ _ tabPanel 1 -- MCI ----
-                                  box(width = 12,
-                                      plotOutput(outputId = "plot_cum_dx_target_mci"))),
-                         tabPanel("AD", # _ _ _ _ _ tabPanel 1 -- AD ----
-                                  box(width = 12,
-                                      plotOutput(outputId = "plot_cum_dx_target_ad"))),
-                         tabPanel("LBD", # _ _ _ _ _ tabPanel 1 -- LBD ----
-                                  box(width = 12,
-                                      plotOutput(outputId = "plot_cum_dx_target_lbd"))),
-                         tabPanel("FTD", # _ _ _ _ _ tabPanel 1 -- FTD ----
-                                  box(width = 12,
-                                      plotOutput(outputId = "plot_cum_dx_target_ftd")))
-                 ) 
-               ),
-               fluidRow(
-                 box( # _ _ _ _ box 2 for date range input (diagnosis) ----
-                      width = 12,
-                      dateRangeInput(inputId = "dateRange2",
-                                     label = "Date range input: yyyy-mm-dd",
-                                     start = as.Date("2017-03-01"),
-                                     end = as.Date("2022-03-01")
-                      )
-                 )
-               ) 
+          )
+        ) 
       ), 
-      tabItem( # _ _ _ Tab for maps ----
-               tabName = "maps",
-               h2("Maps"),
-               fluidRow(
-                 tabBox(
-                   width = 12,
-                   title = "",
-                   id = "tabset_map",
-                   height = "700px",
-                   side = "left",
-                   tabPanel( # _ _ _ _ tabPanel 1 -- county map ----
-                             title = "County",
-                             box(
-                               width = 12,
-                               height = "625px",
-                               plotOutput(outputId = "map_partic_by_county")
-                             )
-                   ), 
-                   tabPanel( # _ _ _ _ tabPanel 2 -- ZIP map ----
-                             title = "ZIP",
-                             box(
-                               width = 12,
-                               height = "625px",
-                               plotOutput(outputId = "map_partic_by_zip")
-                             )
-                   ) 
-                 ) # end tabBox
-               ) # end fluidRow
+      # _ _ _ Tab for maps ----
+      tabItem( 
+        tabName = "maps",
+        h2("Maps"),
+        fluidRow(
+          tabBox(
+            width = 12,
+            title = "",
+            id = "tabset_map",
+            height = "700px",
+            side = "left",
+            tabPanel( # _ _ _ _ tabPanel 1 -- county map ----
+                      title = "County",
+                      box(
+                        width = 12,
+                        height = "625px",
+                        plotOutput(outputId = "map_partic_by_county")
+                      )
+            ), 
+            tabPanel( # _ _ _ _ tabPanel 2 -- ZIP map ----
+                      title = "ZIP",
+                      box(
+                        width = 12,
+                        height = "625px",
+                        plotOutput(outputId = "map_partic_by_zip")
+                      )
+            ) 
+          ) # end tabBox
+        ) # end fluidRow
       ), # end tabItem for Maps
-      tabItem( # _ _ _ Tab for conditions ----
-               tabName = "condx",
-               h2("Conditions by Diagnosis"),
-               fluidRow(
-                 box(
-                   checkboxGroupInput(
-                     inputId = "condxCheckboxes",
-                     label = h3("Conditions"),
-                     inline = TRUE,
-                     choices = list("Cancer" = "cancer", 
-                                    "Diabetes" = "diabet", 
-                                    "Myocardial infarction" = "myoinf",
-                                    "Congestive heart failure" = "conghrt",
-                                    "Hypertension" = "hypert",
-                                    "Hypercholesterolemia" = "hypchol",
-                                    "Arthritis" = "arth",
-                                    "Sleep Apnea" = "sleepap",
-                                    "REM disorder" = "remdis",
-                                    "Hyposomnia/Insomnia" = "hyposom")),
-                   width = 12)
-               ),
-               # fluidRow(
-               #   box( verbatimTextOutput(outputId = "condx"), width = 12 )
-               # ),
-               # fluidRow(
-               #   box( verbatimTextOutput(outputId = "select_condx"), width = 12)
-               # ),
-               fluidRow(
-                 box(plotOutput(outputId = "plot_condx_all"),
-                     width = 12, title = h2("All Diagnoses"))
-               ),
-               fluidRow(
-                 box(plotOutput(outputId = "plot_condx_nl"), 
-                     width = 6, title = h2("NL")),
-                 box(plotOutput(outputId = "plot_condx_mci"), 
-                     width = 6, title = h2("MCI"))
-               ),
-               fluidRow(
-                 box(plotOutput(outputId = "plot_condx_ad"), 
-                     width = 6, title = h2("AD")),
-                 box(plotOutput(outputId = "plot_condx_imp"), 
-                     width = 6, title = h2("Impaired, not MCI"))
-               ),
-               fluidRow(
-                 box(plotOutput(outputId = "plot_condx_ftd"),
-                     width = 6, title = h2("FTD")),
-                 box(plotOutput(outputId ="plot_condx_lbd"), 
-                     width = 6, title = h2("LBD"))
-               ),
-               fluidRow(
-                 box(plotOutput(outputId = "plot_condx_oth"), 
-                     width = 6, title = h2("Other")),
-                 box(plotOutput(outputId = "plot_condx_pnd"), 
-                     width = 6, title = h2("Pending consensus"))
-               ),
-               # fluidRow(
-               #   box( verbatimTextOutput(outputId = "select_name_vctr"),
-               #        width = 12),
-               #   box( verbatimTextOutput(outputId = "select_name_vctr_1"),
-               #        width = 12),
-               #   box( verbatimTextOutput(outputId = "select_name_vctr_2"),
-               #        width = 12),
-               #   box( verbatimTextOutput(outputId = "select_name_vctr_3"),
-               #        width = 12),
-               #   box( verbatimTextOutput(outputId = "select_condx_combn"),
-               #        width = 12)
-               # ),
-               fluidRow( 
-                 # box( verbatimTextOutput(outputId = "select_name_vctr_length"), 
-                 #      width = 12),
-                 box(h3("Selected Conditions"),
-                     DT::dataTableOutput("data_condx_select"),
-                     width = 12)
-               )
-      ) # end tabItem for condx
+      # _ _ _ Tab for condx ----
+      tabItem( 
+        tabName = "condx_fast",
+        h2("Conditions by Diagnosis"),
+        fluidRow(
+          box(
+            checkboxGroupInput(
+              inputId = "condxCheckboxesFast",
+              label = h3("Conditions"),
+              inline = TRUE,
+              choices = list("Cancer" = "cancer", 
+                             "Diabetes" = "diabet", 
+                             "Myocardial infarction" = "myoinf",
+                             "Congestive heart failure" = "conghrt",
+                             "Hypertension" = "hypert",
+                             "Hypercholesterolemia" = "hypchol",
+                             "Arthritis" = "arth",
+                             "Sleep apnea" = "sleepap",
+                             "REM disorder" = "remdis",
+                             "Hyposomnia/Insomnia" = "hyposom")),
+            width = 12)
+        ),
+        fluidRow(
+          box( plotOutput(outputId = "select_condx_fast_combn_pie"),
+               width = 12, title = h2("All Diagnoses"))
+        ),
+        fluidRow(
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_nl"),
+               width = 6, title = h2("NL")),
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_mci"),
+               width = 6, title = h2("MCI"))
+        ),
+        fluidRow(
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_ad"),
+               width = 6, title = h2("AD")),
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_imp"),
+               width = 6, title = h2("Impaired, not MCI"))
+        ),
+        fluidRow(
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_ftd"),
+               width = 6, title = h2("FTD")),
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_lbd"),
+               width = 6, title = h2("LBD"))
+        ),
+        fluidRow(
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_oth"),
+               width = 6, title = h2("Other")),
+          box( plotOutput(outputId = "select_condx_fast_combn_pie_pnd"),
+               width = 6, title = h2("Pending Consensus"))
+        )
+      ) # end tabItem for Condx Fast
     ) # end tabItems
   ) # end dashboardBody
 ) # end dashboardPage
@@ -425,10 +414,17 @@ server <- function(input, output, session) {
                        readFunc = readRDS,
                        session = NULL)
   
-  ## df for condx
-  data_condx <-
+  # ## df for condx
+  # data_condx <-
+  #   reactiveFileReader(intervalMillis = invalidation_time,
+  #                      filePath = "./rds/data_condx.Rds",
+  #                      readFunc = readRDS,
+  #                      session = NULL)
+  
+  ## df for condx fast
+  data_condx_fast <-
     reactiveFileReader(intervalMillis = invalidation_time,
-                       filePath = "./rds/data_condx.Rds",
+                       filePath = "./rds/data_condx_fast.Rds",
                        readFunc = readRDS,
                        session = NULL)
   
@@ -477,7 +473,7 @@ server <- function(input, output, session) {
   
   
   # # # # #
-  ## Render timeline tables ----
+  ## Render timeline tables / plots ----
   
   ## Use `observe` + `lapply` to render all the summary tables
   timeline_tbl_names <- c("timeline")
@@ -495,8 +491,8 @@ server <- function(input, output, session) {
   
   ## Timeline - Visit to Score plot
   output$plot_timeline_exam_scored_hist <- renderPlot({
-    ggplot(data = data(), aes(x = exam_scored_dur)) +
-      geom_histogram(binwidth = 5, center = 2.5, 
+    ggplot(data = data(), aes(x = exam_scored_dur * 5/7)) +
+      geom_histogram(binwidth = 1, center = 0.5, 
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
@@ -504,8 +500,8 @@ server <- function(input, output, session) {
   
   ## Timeline - Visit to Double Score plot
   output$plot_timeline_exam_dbl_scored_hist <- renderPlot({
-    ggplot(data = data(), aes(x = exam_dbl_scored_dur)) +
-      geom_histogram(binwidth = 5, center = 2.5, 
+    ggplot(data = data(), aes(x = exam_dbl_scored_dur * 5/7)) +
+      geom_histogram(binwidth = 1, center = 0.5, 
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
@@ -513,8 +509,8 @@ server <- function(input, output, session) {
   
   ## Timeline - Visit to First Consensus plot
   output$plot_timeline_exam_consensus_dur_hist <- renderPlot({
-    ggplot(data = data(), aes(x = exam_consensus_dur)) +
-      geom_histogram(binwidth = 25, center = 12.5, 
+    ggplot(data = data(), aes(x = exam_consensus_dur * 5/7)) +
+      geom_histogram(binwidth = 1, center = 0.5, 
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
@@ -522,8 +518,8 @@ server <- function(input, output, session) {
   
   ## Timeline - Final Consensus to Feedback plot
   output$plot_timeline_final_consensus_fb_hist <- renderPlot({
-    ggplot(data = data(), aes(x = final_consensus_fb_dur)) +
-      geom_histogram(binwidth = 25, center = 12.5, 
+    ggplot(data = data(), aes(x = final_consensus_fb_dur * 5/7)) +
+      geom_histogram(binwidth = 1, center = 0.5, 
                      color = "#000000", fill = "#3885B7",
                      na.rm = TRUE) +
       scale_x_continuous(name = "Days")
@@ -639,126 +635,114 @@ server <- function(input, output, session) {
               subtitle = "March 2017 to Present")
   }, height = 600)
   
+  
   # # # # #
-  ## Render condx plots ----
-  output$condx <- renderPrint({ input$condxCheckboxes })
+  # Render condx plots ----
+  select_condx_fast <- reactive({ as.character(unlist(input$condxCheckboxesFast)) })
   
-  select_condx <- reactive({ as.character(unlist(input$condxCheckboxes)) })
-  output$select_condx <- renderPrint({ select_condx() })
-  
-  # Get/parse user condx selections
-  select_condx_combn <- reactive({
+  # Build list with nCk select_condx_fast condx using `combn()`
+  select_condx_fast_combn <- reactive({
     purrr::map(
-      0:length(select_condx()), 
-      function(x) { combn(select_condx(), x, simplify = TRUE) })
-  })
-  select_name_vctr <- reactive({ 
-    purrr::map(
-      select_condx_combn(), 
+      0:length(select_condx_fast()),
       function(x) {
-        x <- as.data.frame(x)
-        purrr::map_chr(
-          x,
-          function(y) {
-            paste(y, collapse = "_") 
-          })
+        combn(select_condx_fast(), x, simplify = TRUE)
       })
   })
-  select_name_vctr_3 <- reactive({
-    if (length(select_name_vctr()) > 1) {
-      unname(unlist(c("nullcond", select_name_vctr()[2:length(select_name_vctr())])))
-    } else {
-      unname(unlist(c("nullcond")))
+
+  # Build container list for all condx / all dx
+  select_condx_fast_combn_lst <- reactive({
+    select_condx_fast_combn_vctr <- c()
+    select_condx_fast_combn_vctr_rgx <- c()
+    # select_condx_fast_combn_vctr_cnt <- c()
+    # select_condx_fast_combn_vctr_rows <- list()
+
+    for (i in 1:length(select_condx_fast_combn())) {
+      for (j in 1:ncol(select_condx_fast_combn()[[i]])) {
+        col_name <- c(select_condx_fast_combn()[[i]][, j])
+        select_condx_fast_combn_vctr <-
+          c(select_condx_fast_combn_vctr,
+            paste0(col_name, collapse = " + "))
+        select_condx_fast_combn_vctr_rgx <-
+          c(select_condx_fast_combn_vctr_rgx,
+            paste0("(?=.*", col_name, ")", collapse = ""))
+      }
     }
+
+    return(list(select_condx_fast_combn_vctr = select_condx_fast_combn_vctr,
+                select_condx_fast_combn_vctr_rgx = select_condx_fast_combn_vctr_rgx))
   })
   
-  # output$select_name_vctr   <- renderPrint({ select_name_vctr() })
-  # output$select_name_vctr_1 <- renderPrint({ select_name_vctr_1() })
-  # output$select_name_vctr_2 <- renderPrint({ select_name_vctr_2() })
-  # output$select_name_vctr_3 <- renderPrint({ select_name_vctr_3() })
-  # output$select_condx_combn <- renderPrint({ select_condx_combn() })
-  
-  # Condx x Dx table
-  # output$select_name_vctr_length <- renderPrint({ length(select_name_vctr_3()) })
-  select_data_condx <- reactive({
-    if (length(input$condxCheckboxes) == 0) {
-      return( subset(data_condx(), select = c("uds_dx", "nullcond")) )
-    } else {
-      return( subset(data_condx(), select = c("uds_dx", select_name_vctr_3())) )
-    }
+  # Output condx fast
+  # output$select_condx_fast_combn <- renderPrint({
+  #   select_condx_fast_combn()
+  # })
+  output$select_condx_fast_combn_lst <- renderPrint({
+    select_condx_fast_combn_lst()
   })
-  output$data_condx_select <- DT::renderDataTable({
-    DT::datatable( select_data_condx(), options = dt_options )
-  })
-  
   # Pie graphs
-  # slices
-  slice_all <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "Totals",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(),
+                   condx = select_condx_fast(),
+                   dx = NULL,
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_nl <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "NL",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_nl <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "NL",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_mci <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "MCI",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_mci <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "MCI",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_ad <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "AD", 
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_ad <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "AD",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_imp <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "Impaired, not MCI",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_imp <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "Impaired, not MCI",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_ftd <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "FTD",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_ftd <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "FTD",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_lbd <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "LBD",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_lbd <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "LBD",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_oth <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "Other",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_oth <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "Other",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  slice_pnd <- reactive({
-    as.integer( subset(select_data_condx(), uds_dx == "Pending consensus",
-                       select = select_name_vctr_3()) )
+  output$select_condx_fast_combn_pie_pnd <- renderPlot({
+    pie_graph_fast(data = data_condx_fast(), 
+                   condx = select_condx_fast(), 
+                   dx = "Pending consensus",
+                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
-  
-  # plots
-  output$plot_condx_all <- renderPlot({
-    pie_graph(slice_all(), select_name_vctr_3())
-  })
-  output$plot_condx_nl <- renderPlot({ 
-    pie_graph(slice_nl(), select_name_vctr_3())
-  })
-  output$plot_condx_mci <- renderPlot({
-    pie_graph(slice_mci(), select_name_vctr_3())
-  })
-  output$plot_condx_ad <- renderPlot({
-    pie_graph(slice_ad(), select_name_vctr_3())
-  })
-  output$plot_condx_imp <- renderPlot({
-    pie_graph(slice_imp(), select_name_vctr_3())
-  })
-  output$plot_condx_ftd <- renderPlot({
-    pie_graph(slice_ftd(), select_name_vctr_3())
-  })
-  output$plot_condx_lbd <- renderPlot({
-    pie_graph(slice_lbd(), select_name_vctr_3())
-  })
-  output$plot_condx_oth <- renderPlot({
-    pie_graph(slice_oth(), select_name_vctr_3())
-  })
-  output$plot_condx_pnd <- renderPlot({
-    pie_graph(slice_pnd(), select_name_vctr_3())
-  })
-  
   
 }
 

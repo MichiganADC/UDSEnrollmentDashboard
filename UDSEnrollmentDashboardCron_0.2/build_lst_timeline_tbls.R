@@ -23,30 +23,32 @@ lst_timeline_tbls <- list()
 # # # # # 
 ## Participant Timelines table ----
 
+wkdy_fctr <- 5/7 # to account for work only being down 5 out of 7 days
+
 exam_scored_dur_df <- data %>%
   dplyr::filter(!is.na(exam_scored_dur)) %>%
   dplyr::summarize(N = n(),
-                   Mean = round(mean(exam_scored_dur), 2),
-                   SD =   round(sd(exam_scored_dur), 2),
-                   SEM =  round(sd(exam_scored_dur) / sqrt(n()), 2))
+                   Mean = round(mean(exam_scored_dur * wkdy_fctr), 2),
+                   SD =   round(sd(exam_scored_dur * wkdy_fctr), 2),
+                   SEM =  round(sd(exam_scored_dur * wkdy_fctr) / sqrt(n()), 2))
 exam_dbl_scored_df <- data %>%
   dplyr::filter(!is.na(exam_dbl_scored_dur)) %>%
   dplyr::summarize(N = n(),
-                   Mean = round(mean(exam_dbl_scored_dur), 2),
-                   SD = round(sd(exam_dbl_scored_dur), 2),
-                   SEM = round(sd(exam_dbl_scored_dur) / sqrt(n()), 2))
+                   Mean = round(mean(exam_dbl_scored_dur * wkdy_fctr), 2),
+                   SD = round(sd(exam_dbl_scored_dur * wkdy_fctr), 2),
+                   SEM = round(sd(exam_dbl_scored_dur * wkdy_fctr) / sqrt(n()), 2))
 exam_consensus_dur_df <- data %>%
   dplyr::filter(!is.na(exam_consensus_dur)) %>%
   dplyr::summarize(N = n(),
-                   Mean = round(mean(exam_consensus_dur), 2),
-                   SD = round(sd(exam_consensus_dur), 2),
-                   SEM = round(sd(exam_consensus_dur) / sqrt(n()), 2))
+                   Mean = round(mean(exam_consensus_dur * wkdy_fctr), 2),
+                   SD = round(sd(exam_consensus_dur * wkdy_fctr), 2),
+                   SEM = round(sd(exam_consensus_dur * wkdy_fctr) / sqrt(n()), 2))
 final_consensus_fb_dur <- data %>%
   dplyr::filter(!is.na(final_consensus_fb_dur)) %>%
   dplyr::summarize(N = n(),
-                   Mean = round(mean(final_consensus_fb_dur), 2),
-                   SD = round(sd(final_consensus_fb_dur), 2),
-                   SEM = round(sd(final_consensus_fb_dur) / sqrt(n()), 2))
+                   Mean = round(mean(final_consensus_fb_dur * wkdy_fctr), 2),
+                   SD = round(sd(final_consensus_fb_dur * wkdy_fctr), 2),
+                   SEM = round(sd(final_consensus_fb_dur * wkdy_fctr) / sqrt(n()), 2))
 timeline_tbl <- dplyr::bind_rows(exam_scored_dur_df, 
                                  exam_dbl_scored_df,
                                  exam_consensus_dur_df,

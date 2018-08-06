@@ -108,13 +108,68 @@ pie_graph <- function(slice_dx, select_name_vctr) {
   slice_dx_sum <- sum(slice_dx)
   if (any(as.logical(slice_dx))) {
     pie(x = slice_dx[as.logical(slice_dx)], 
-        labels = paste(paste0(select_name_vctr[as.logical(slice_dx)], ", "), 
-                       paste0("n=", slice_dx[as.logical(slice_dx)], ", "),
-                       paste0(round(slice_dx / slice_dx_sum * 100)[as.logical(slice_dx)], "%")),
-        col = rainbow(length(slice_dx[as.logical(slice_dx)])), 
-        clockwise = TRUE, init.angle = 180, radius = 0.9)
+        labels = paste(# paste0(select_name_vctr[as.logical(slice_dx)], ", "), 
+                       # paste0("n=", slice_dx[as.logical(slice_dx)], ", "),
+                       paste0(round(slice_dx / slice_dx_sum * 100)[as.logical(slice_dx)], "%")
+                       ),
+        col = rainbow(length(slice_dx[as.logical(slice_dx)]), s = 0.75), 
+        clockwise = TRUE, init.angle = 180, radius = 0.85)
+    legend("topleft", 
+           legend = paste(paste0(select_name_vctr[as.logical(slice_dx)], ", "), 
+                          paste0("n=", slice_dx[as.logical(slice_dx)]) #,
+                          #paste0(round(slice_dx / slice_dx_sum * 100)[as.logical(slice_dx)], "%")
+                          ),
+           fill = rainbow(length(slice_dx[as.logical(slice_dx)]), s = 0.75),
+           cex = 1, bty = "n"
+           )
   }
 }
+
+pie_graph_fast <- function(data, 
+                           condx, 
+                           dx = NULL,
+                           combn_vctr,
+                           combn_vctr_rgx) {
+  par(mar = rep(0, 4))
+  combn_vctr[1] <- "remaining"
+  select_condx_fast_combn_vctr_cnt <- c()
+  select_condx_fast_combn_vctr_rows <- list()
+  
+  if (!is.null(dx)) {
+    data_cp <- data[data$uds_dx == dx, ]
+  } else {
+    data_cp <- data
+  }
+  dx_sum <- nrow(data_cp)
+  
+  for (i in length(combn_vctr_rgx):1) {
+    select_condx_fast_combn_vctr_rows[[i]] <-
+      stringr::str_detect(string = data_cp$condx_combn_name,
+                          pattern = combn_vctr_rgx[i])
+    select_condx_fast_combn_vctr_cnt[i] <- sum(select_condx_fast_combn_vctr_rows[[i]])
+    data_cp <- data_cp[!select_condx_fast_combn_vctr_rows[[i]], ]
+  }
+  
+  pie(x = select_condx_fast_combn_vctr_cnt[as.logical(select_condx_fast_combn_vctr_cnt)],
+      labels = sprintf("%.2f", select_condx_fast_combn_vctr_cnt[as.logical(select_condx_fast_combn_vctr_cnt)] / 
+                       dx_sum),
+      col = rainbow(
+        n = length(select_condx_fast_combn_vctr_cnt[as.logical(select_condx_fast_combn_vctr_cnt)]), s = 0.7),
+      clockwise = TRUE,
+      init.angle = 180)
+  legend("topleft",
+         legend = paste0(combn_vctr[as.logical(select_condx_fast_combn_vctr_cnt)], " n=",
+                         select_condx_fast_combn_vctr_cnt[as.logical(select_condx_fast_combn_vctr_cnt)]),
+         fill = rainbow(
+           n = length(select_condx_fast_combn_vctr_cnt[as.logical(select_condx_fast_combn_vctr_cnt)]), s = 0.7),
+         cex = 1, bty = "n"
+  )
+}
+
+
+
+
+
 
 
 

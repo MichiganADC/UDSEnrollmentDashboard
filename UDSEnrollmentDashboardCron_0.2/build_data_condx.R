@@ -13,7 +13,7 @@ if (deployed) {
     "~/Documents/GitHub/UDSEnrollmentDashboard/UDSEnrollmentDashboardCron_0.2/"
 }
 
-source("helper_fxns_summ_tbls.R")
+source(paste0(path_to_app, "helper_fxns_summ_tbls.R"), local = TRUE)
 
 # **** ----
 # GET DATA ----
@@ -23,16 +23,16 @@ data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 
 # _ Define `condx_vctr` ----
 condx_vctr <- condx_vctr <- c(
-  'cancer',       # Condx -- Cancer
-  'diabet',       # Condx -- Diabetes
-  'myoinf',       # Condx -- Myocardial infarction
-  'conghrt',      # Condx -- Congestive heart failure
-  'hypert',       # Condx -- Hypertension
-  'hypchol',      # Condx -- Hypercholesterolemia
-  'arth',         # Condx -- Arthritis
-  'sleepap',      # Condx -- Sleep apnea
-  'remdis',       # Condx -- REM sleep behavior disorder
-  'hyposom'       # Condx -- Hyposomnia / insomnia
+  'cancer'     # Condx -- Cancer
+  , 'diabet'   # Condx -- Diabetes
+  , 'myoinf'   # Condx -- Myocardial infarction
+  , 'conghrt'  # Condx -- Congestive heart failure
+  , 'hypert'   # Condx -- Hypertension
+  , 'hypchol'  # Condx -- Hypercholesterolemia
+  , 'arth'     # Condx -- Arthritis
+  , 'sleepap'  # Condx -- Sleep apnea
+  , 'remdis'   # Condx -- REM sleep behavior disorder
+  , 'hyposom'  # Condx -- Hyposomnia / insomnia
 )
 # _ Define `dx_levels` ----
 dx_levels <- c("MCI", "NL", "LBD", "AD", "FTD", "Impaired, not MCI",
@@ -47,6 +47,8 @@ data <- data[, c("subject_id", "uds_dx", condx_vctr)]
 # _ Coerce condx fields to integer
 condx_col_first <- which(names(data) == "cancer")
 condx_col_last  <- which(names(data) == "hyposom")
+# condx_col_first <- which(names(data) == "diabet")
+# condx_col_last  <- which(names(data) == "hypchol")
 data[, condx_col_first:condx_col_last] <- 
   purrr::map_df(data[, condx_col_first:condx_col_last], as.integer)
 # purrr::map_chr(data, class)
@@ -58,6 +60,8 @@ data <- data %>%
 
 condx_col_first <- which(names(data) == "cancer")
 condx_col_last  <- which(names(data) == "hyposom")
+# condx_col_first <- which(names(data) == "diabet")
+# condx_col_last  <- which(names(data) == "hypchol")
 for (i in 1:nrow(data)) {
   if (!any(as.logical(data[i, condx_col_first:condx_col_last]))) {
     data[i, "nullcond"] <- 1L
@@ -72,9 +76,9 @@ for (i in 1:nrow(data)) {
 
 # _ Build list with nCk condx using `combn()` ----
 condx_combn <- purrr::map(
-  0:length(condx_vctr), 
-  function(x) { 
-    combn(condx_vctr, x, simplify = TRUE) 
+  0:length(condx_vctr),
+  function(x) {
+    combn(condx_vctr, x, simplify = TRUE)
   })
 
 # _ Flatten nCk list to a chr vector ----
@@ -113,20 +117,27 @@ for (i in 1:nrow(data)) {
 # **** ----
 # BUILD CONDX x DX SUM TABLE ----
 
-condx_dx_sums <- data %>% 
-  dplyr::group_by(uds_dx) %>% 
+condx_dx_sums <- data %>%
+  dplyr::group_by(uds_dx) %>%
   dplyr::summarize_at(.tbl = .,
                       .vars = dplyr::vars(condx_combn_vctr[1:length(condx_combn_vctr)]),
                       .funs = dplyr::funs(sum))
 
+# Dx row sums
+# condx_dx_sums <- condx_dx_sums %>%
+#   dplyr::mutate(row_sum = rowSums(.[2:ncol(.)]))
+condx_dx_sums$row_sum <- rowSums(condx_dx_sums[2:ncol(condx_dx_sums)])
+
+# Condx column sums
 condx_dx_sums <- add_totals_row(condx_dx_sums)
+
+# Reorder columns
+condx_dx_sums <- condx_dx_sums %>%
+  dplyr::select(uds_dx, row_sum, dplyr::everything())
 
 # **** ----
 # WRITE TO RDS ----
 
 saveRDS(condx_dx_sums, paste0(path_to_app, "rds/data_condx.Rds"))
-
-
-
 
 
