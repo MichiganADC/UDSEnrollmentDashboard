@@ -681,67 +681,76 @@ server <- function(input, output, session) {
   })
   # Pie graphs
   output$select_condx_fast_combn_pie <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(),
-                   condx = select_condx_fast(),
-                   dx = NULL,
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(),
+      condx = select_condx_fast(),
+      dx = NULL,
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_nl <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "NL",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "NL",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_mci <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "MCI",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "MCI",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_ad <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "AD",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "AD",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_imp <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "Impaired, not MCI",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "Impaired, not MCI",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_ftd <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "FTD",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "FTD",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_lbd <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "LBD",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "LBD",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_oth <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "Other",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "Other",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   output$select_condx_fast_combn_pie_pnd <- renderPlot({
-    pie_graph_fast(data = data_condx_fast(), 
-                   condx = select_condx_fast(), 
-                   dx = "Pending consensus",
-                   combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
-                   combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
+    pie_graph_fast(
+      data = data_condx_fast(), 
+      condx = select_condx_fast(), 
+      dx = "Pending consensus",
+      combn_vctr = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr,
+      combn_vctr_rgx = select_condx_fast_combn_lst()$select_condx_fast_combn_vctr_rgx)
   })
   
 }

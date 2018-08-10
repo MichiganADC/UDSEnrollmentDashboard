@@ -35,7 +35,6 @@ fields_ms <- c('subject_id',         # partic. ID
                'race_value',         # demox
                'sex_value',          # demox
                'county',             # demox
-               'birth_date',         # demox
                'zip_code',           # demox
                'comp_withd',         # research
                'blood_drawn',        # research
@@ -414,10 +413,6 @@ df_ms_xfrm <- df_ms_xfrm %>%
   dplyr::mutate(mri_completed = forcats::as_factor(mri_completed))
 
 ## Leave `county` field as character class
-
-## Coerce `birth_date` to Date class
-df_ms_xfrm <- df_ms_xfrm %>%
-  dplyr::mutate(birth_date = lubridate::ymd(birth_date))
 
 ## Mutate `zip_code` to only include first 5 digits
 df_ms_xfrm <- df_ms_xfrm %>%
