@@ -2,7 +2,7 @@
 
 # Build list of participant timeline tables
 
-library(magrittr)
+`%>%` <- magrittr::`%>%`
 
 deployed <- TRUE
 
@@ -69,9 +69,4 @@ lst_timeline_tbls[["timeline_tbl"]] <- timeline_tbl
 saveRDS(lst_timeline_tbls, paste0(path_to_app, "rds/lst_timeline_tbls.Rds"))
 
 
-## PLOTS 
-# hist(data$exam_scored_dur)
-# hist(data$exam_dbl_scored_dur)
-# hist(data$exam_consensus_dur)
-# hist(data$final_consensus_fb_dur)
 

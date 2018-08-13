@@ -7,16 +7,16 @@
 # # # # # 
 # Load libraries ---- 
 
-package.list <- c("shiny", "shinydashboard", "DT", "ggplot2", "RCurl", 
-                  "jsonlite", "dplyr", "tidyr", "lubridate", "forcats",
-                  "ggmap", "maps", "mapdata", "zipcode")
-new.package.list <- 
-  package.list[!(package.list %in% installed.packages()[, "Package"])]
-if (length(new.package.list)) { 
-  install.packages(new.package.list,
-                   repos = "https://cloud.r-project.org/",
-                   verbose = TRUE) 
-}
+# package.list <- c("shiny", "shinydashboard", "DT", "ggplot2", "RCurl", 
+#                   "jsonlite", "dplyr", "tidyr", "lubridate", "forcats",
+#                   "ggmap", "maps", "mapdata", "zipcode")
+# new.package.list <- 
+#   package.list[!(package.list %in% installed.packages()[, "Package"])]
+# if (length(new.package.list)) { 
+#   install.packages(new.package.list,
+#                    repos = "https://cloud.r-project.org/",
+#                    verbose = TRUE) 
+# }
 
 library(shiny)
 library(shinydashboard)
@@ -108,7 +108,7 @@ ui <- dashboardPage(
     # tags$style(".fa-dashboard {color:#064193}"),
     # tags$style(".fa-tint {color:#064193}"),
     # tags$style(".fa-magnet {color:#064193}"),
-    ## Set h2 css style
+    ## Set h2, h6 css style
     tags$style("h2 {padding-top:0px;margin-top:0px;}"),
     tags$style("h6 {padding:0px;margin:0px;}"),
     
@@ -379,7 +379,6 @@ server <- function(input, output, session) {
   ## Get data ----
   
   ## Raw MiNDSet data
-  # data <- readRDS(paste0(path_to_app, "rds/df_mindset_xfrm.Rds"))
   data <- 
     reactiveFileReader(intervalMillis = invalidation_time,
                        filePath = "./rds/df_ms_xfrm.Rds",
@@ -414,13 +413,6 @@ server <- function(input, output, session) {
                        readFunc = readRDS,
                        session = NULL)
   
-  # ## df for condx
-  # data_condx <-
-  #   reactiveFileReader(intervalMillis = invalidation_time,
-  #                      filePath = "./rds/data_condx.Rds",
-  #                      readFunc = readRDS,
-  #                      session = NULL)
-  
   ## df for condx fast
   data_condx_fast <-
     reactiveFileReader(intervalMillis = invalidation_time,
@@ -443,8 +435,7 @@ server <- function(input, output, session) {
       })
     }) # end `lapply`
   }) # end `observe`
-  
-  ## Example of a single table render
+  ## Example of a single table render w/o observe+lapply
   # output$data_mindset_tbl <- DT::renderDataTable({ 
   #   DT::datatable( data_mindset_rctv(), options = dt_options ) 
   # })
@@ -462,8 +453,7 @@ server <- function(input, output, session) {
       )
     })
   })
-  
-  ## Example of single download button
+  ## Example of single download button w/o observe+lapply
   # output$uds_vers_dl <- downloadHandler(
   #   filename = function() { paste("uds_vers_dl.csv") },
   #   content = function(file) {
@@ -653,16 +643,14 @@ server <- function(input, output, session) {
   select_condx_fast_combn_lst <- reactive({
     select_condx_fast_combn_vctr <- c()
     select_condx_fast_combn_vctr_rgx <- c()
-    # select_condx_fast_combn_vctr_cnt <- c()
-    # select_condx_fast_combn_vctr_rows <- list()
 
     for (i in 1:length(select_condx_fast_combn())) {
       for (j in 1:ncol(select_condx_fast_combn()[[i]])) {
         col_name <- c(select_condx_fast_combn()[[i]][, j])
-        select_condx_fast_combn_vctr <-
+        select_condx_fast_combn_vctr <- # display names of condx combn.s
           c(select_condx_fast_combn_vctr,
             paste0(col_name, collapse = " + "))
-        select_condx_fast_combn_vctr_rgx <-
+        select_condx_fast_combn_vctr_rgx <- # find all selected condx
           c(select_condx_fast_combn_vctr_rgx,
             paste0("(?=.*", col_name, ")", collapse = ""))
       }
