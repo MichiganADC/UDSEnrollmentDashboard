@@ -1,11 +1,5 @@
 #!/usr/bin/env Rscript
 
-# ETL for Mindset Registry 3/2017 report + UDS 2.0 IDs report
-
-# library(RCurl)
-# library(jsonlite)
-# library(dplyr)
-# library(tidyr)
 
 # # # # #
 # USEFUL VARS ----
@@ -30,23 +24,25 @@ source(paste0(path_to_app, "config.R"), local = TRUE)
 # _ _ Demox data ----
 # _ _ Research data ----
 # _ _ Timeline data ----
-fields_ms <- c('subject_id',         # partic. ID
-               'exam_date',          # visit date
-               'race_value',         # demox
-               'sex_value',          # demox
-               'county',             # demox
-               'zip_code',           # demox
-               'comp_withd',         # research
-               'blood_drawn',        # research
-               'consent_to_autopsy', # research
-               'mri_completed',      # research
-               'sample_given',       # research
-               'scored',             # timeline
-               'dbl_scored',         # timeline
-               'consensus_date',     # timeline
-               'second_consensus',   # timeline
-               'fb_date'             # timeline
-               ) %>% paste(collapse = ',')
+fields_ms <- 
+  c(
+    'subject_id',         # partic. ID
+    'exam_date',          # visit date
+    'race_value',         # demox
+    'sex_value',          # demox
+    'county',             # demox
+    'zip_code',           # demox
+    'comp_withd',         # research
+    'blood_drawn',        # research
+    'consent_to_autopsy', # research
+    'mri_completed',      # research
+    'sample_given',       # research
+    'scored',             # timeline
+    'dbl_scored',         # timeline
+    'consensus_date',     # timeline
+    'second_consensus',   # timeline
+    'fb_date'             # timeline
+  ) %>% paste(collapse = ',')
 json_ms <- RCurl::postForm(
   uri=API_URL,
   token=API_TOKEN_MINDSET,
@@ -73,7 +69,7 @@ df_ms_xfrm <- df_ms %>%
 # _ UDS 2.0 data ----
 # _ _ ID data only ----
 fields_uds2 <- c('subject_id'       # partic. ID
-                 ) %>% paste(collapse = ",")
+) %>% paste(collapse = ",")
 df_uds2 <- 
   jsonlite::fromJSON(
     RCurl::postForm(
@@ -91,7 +87,7 @@ df_uds2 <-
       exportDataAccessGroups='false',
       returnFormat='json',
       filterLogic='([madc_id] >= "2013")',
-      # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # can't use now*
+      # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # see note below*
       .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
     )
   ) %>% 
@@ -102,74 +98,77 @@ df_uds2 <-
 # _ UDS 3.0 data ----
 # _ _ Dx data (clin. pheno. + etiology) ----
 # _ _ Condx data ----
-condx_vctr <- c(
-  # D2 - Initial visits
-  'cancer',       # Condx -- Cancer
-  'diabet',       # Condx -- Diabetes
-  'myoinf',       # Condx -- Myocardial infarction
-  'conghrt',      # Condx -- Congestive heart failure
-  'hypert',       # Condx -- Hypertension
-  'hypchol',      # Condx -- Hypercholesterolemia
-  'arth',         # Condx -- Arthritis
-  'sleepap',      # Condx -- Sleep apnea
-  'remdis',       # Condx -- REM sleep behavior disorder
-  'hyposom',      # Condx -- Hyposomnia / insomnia
-  # D2 - Follow-up visits
-  'fu_cancer',    # Condx -- Cancer
-  'fu_diabet',    # Condx -- Diabetes
-  'fu_myoinf',    # Condx -- Myocardial infarction
-  'fu_conghrt',   # Condx -- Congestive heart failure
-  'fu_hypert',    # Condx -- Hypertension
-  'fu_hypchol',   # Condx -- Hypercholesterolemia
-  'fu_arth',      # Condx -- Arthritis
-  'fu_sleepap',   # Condx -- Sleep apnea
-  'fu_remdis',    # Condx -- REM sleep behavior disorder
-  'fu_hyposom'    # Condx -- Hyposomnia / insomnia
-)
-fields_uds3 <- c('ptid',         # partic. ID
-                 'form_date',    # visit date
-                 # D1 - Initial visits
-                 'normcog',      # Dx -- NL
-                 'demented',     # --
-                 'mciamem',      # Dx -- aMCI
-                 'mciaplus',     # Dx -- aMCI
-                 'mcinon1',      # Dx -- naMCI
-                 'mcinon2',      # Dx -- naMCI
-                 'impnomci',     # Dx -- Cognitively impaired
-                 'alzdis',       # Dx -- AD
-                 'alzdisif',     # Dx -- AD
-                 'lbdis',        # Dx -- LBD
-                 'lbdif',        # Dx -- LBD
-                 'psp',          # Dx -- FTD
-                 'pspif',        # Dx -- FTD
-                 'cort',         # Dx -- FTD
-                 'cortif',       # Dx -- FTD
-                 'ftldmo',       # Dx -- FTD
-                 'ftldmoif',     # Dx -- FTD
-                 'ftldnos',      # Dx -- FTD
-                 'ftldnoif',     # Dx -- FTD
-                 # D1 - Follow-up visits
-                 'fu_normcog',   # Dx -- NL
-                 'fu_demented',  # --
-                 'fu_mciamem',   # Dx -- aMCI
-                 'fu_mciaplus',  # Dx -- aMCI
-                 'fu_mcinon1',   # Dx -- naMCI
-                 'fu_mcinon2',   # Dx -- naMCI
-                 'fu_impnomci',  # Dx -- Cognitively impaired
-                 'fu_alzdis',    # Dx -- AD
-                 'fu_alzdisif',  # Dx -- AD
-                 'fu_lbdis',     # Dx -- LBD
-                 'fu_lbdif',     # Dx -- LBD
-                 'fu_psp',       # Dx -- FTD
-                 'fu_pspif',     # Dx -- FTD
-                 'fu_cort',      # Dx -- FTD
-                 'fu_cortif',    # Dx -- FTD
-                 'fu_ftldmo',    # Dx -- FTD
-                 'fu_ftldmoif',  # Dx -- FTD
-                 'fu_ftldnos',   # Dx -- FTD
-                 'fu_ftldnoif',  # Dx -- FTD
-                 condx_vctr      # Condx (10, initial & follow-up)
-                 ) %>% paste(collapse = ',')
+condx_vctr <- 
+  c(
+    # D2 - Initial visits
+    'cancer',       # Condx -- Cancer
+    'diabet',       # Condx -- Diabetes
+    'myoinf',       # Condx -- Myocardial infarction
+    'conghrt',      # Condx -- Congestive heart failure
+    'hypert',       # Condx -- Hypertension
+    'hypchol',      # Condx -- Hypercholesterolemia
+    'arth',         # Condx -- Arthritis
+    'sleepap',      # Condx -- Sleep apnea
+    'remdis',       # Condx -- REM sleep behavior disorder
+    'hyposom',      # Condx -- Hyposomnia / insomnia
+    # D2 - Follow-up visits
+    'fu_cancer',    # Condx -- Cancer
+    'fu_diabet',    # Condx -- Diabetes
+    'fu_myoinf',    # Condx -- Myocardial infarction
+    'fu_conghrt',   # Condx -- Congestive heart failure
+    'fu_hypert',    # Condx -- Hypertension
+    'fu_hypchol',   # Condx -- Hypercholesterolemia
+    'fu_arth',      # Condx -- Arthritis
+    'fu_sleepap',   # Condx -- Sleep apnea
+    'fu_remdis',    # Condx -- REM sleep behavior disorder
+    'fu_hyposom'    # Condx -- Hyposomnia / insomnia
+  )
+fields_uds3 <- 
+  c(
+    'ptid',         # partic. ID
+    'form_date',    # visit date
+    # D1 - Initial visits
+    'normcog',      # Dx -- NL
+    'demented',     # --
+    'mciamem',      # Dx -- aMCI
+    'mciaplus',     # Dx -- aMCI
+    'mcinon1',      # Dx -- naMCI
+    'mcinon2',      # Dx -- naMCI
+    'impnomci',     # Dx -- Cognitively impaired
+    'alzdis',       # Dx -- AD
+    'alzdisif',     # Dx -- AD
+    'lbdis',        # Dx -- LBD
+    'lbdif',        # Dx -- LBD
+    'psp',          # Dx -- FTD
+    'pspif',        # Dx -- FTD
+    'cort',         # Dx -- FTD
+    'cortif',       # Dx -- FTD
+    'ftldmo',       # Dx -- FTD
+    'ftldmoif',     # Dx -- FTD
+    'ftldnos',      # Dx -- FTD
+    'ftldnoif',     # Dx -- FTD
+    # D1 - Follow-up visits
+    'fu_normcog',   # Dx -- NL
+    'fu_demented',  # --
+    'fu_mciamem',   # Dx -- aMCI
+    'fu_mciaplus',  # Dx -- aMCI
+    'fu_mcinon1',   # Dx -- naMCI
+    'fu_mcinon2',   # Dx -- naMCI
+    'fu_impnomci',  # Dx -- Cognitively impaired
+    'fu_alzdis',    # Dx -- AD
+    'fu_alzdisif',  # Dx -- AD
+    'fu_lbdis',     # Dx -- LBD
+    'fu_lbdif',     # Dx -- LBD
+    'fu_psp',       # Dx -- FTD
+    'fu_pspif',     # Dx -- FTD
+    'fu_cort',      # Dx -- FTD
+    'fu_cortif',    # Dx -- FTD
+    'fu_ftldmo',    # Dx -- FTD
+    'fu_ftldmoif',  # Dx -- FTD
+    'fu_ftldnos',   # Dx -- FTD
+    'fu_ftldnoif',  # Dx -- FTD
+    condx_vctr      # Condx (10, initial & follow-up)
+  ) %>% paste(collapse = ',')
 json_uds3 <- RCurl::postForm(
   uri=API_URL,
   token=API_TOKEN_UDS3,
@@ -183,7 +182,7 @@ json_uds3 <- RCurl::postForm(
   exportSurveyFields='false',
   exportDataAccessGroups='false',
   returnFormat='json',
-  # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # can't use now*
+  # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # see note below*
   .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
 )
 df_uds3 <- jsonlite::fromJSON(json_uds3) %>% 
@@ -463,13 +462,11 @@ df_ms_xfrm <- df_ms_xfrm %>%
 # # # # # 
 ## Process `df_uds2`` ----
 ## ... add a simple `uds_version` character column
-###
 df_uds2 <- df_uds2 %>% 
   dplyr::mutate(uds_version = "UDS 2/3")
 
 # # # # # 
 ## Left join `df_ms_xfrm`` and `df_uds2` ----
-###
 df_ms_xfrm <- df_ms_xfrm %>% 
   dplyr::left_join(df_uds2, by = "subject_id") %>% 
   dplyr::mutate(uds_version = 
