@@ -4,6 +4,7 @@
 
 `%>%` <- magrittr::`%>%`
 deployed <- TRUE
+# deployed <- FALSE
 
 if (deployed) {
   path_to_app <- # Michigan Medicine R Shiny server

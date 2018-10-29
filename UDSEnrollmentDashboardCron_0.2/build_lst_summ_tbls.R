@@ -2,7 +2,10 @@
 
 # Build list of report summary tables
 
+library(dplyr)
+`%>%` <- magrittr::`%>%`
 deployed <- TRUE
+# deployed <- FALSE
 
 if (deployed) {
   path_to_app <-
@@ -13,7 +16,14 @@ if (deployed) {
 }
 
 data <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
+df_ms_xfrm_lng <- readRDS(paste0(path_to_app, "rds/df_ms_xfrm_lng.Rds"))
+df_ms_xfrm_lng_tbl <- df_ms_xfrm_lng %>%
+  dplyr::group_by(uds_dx, visit_cumsum) %>%
+  dplyr::summarize(n = dplyr::n()) %>%
+  tidyr::spread(key = visit_cumsum, value = n)
+names(df_ms_xfrm_lng_tbl)[-1] <- paste("Visit", names(df_ms_xfrm_lng_tbl[-1]))
 source(paste0(path_to_app, "helper_fxns_summ_tbls.R"))
+
 
 # build_lst_summ_tbls <- function(data) {
 
@@ -28,6 +38,9 @@ lst_summ_tbls <- list()
 lst_summ_cts$total_cts <- 
   single_grp_table(data, 
                    group_var = quo(uds_dx))
+
+# Visit counts
+lst_summ_cts$visit_cts <- df_ms_xfrm_lng_tbl
 
 # UDS Version counts 
 lst_summ_cts$uds_vers_cts <-
@@ -186,6 +199,11 @@ lst_summ_cts$sex_blood_yes_cts <-
 
 # # # # # 
 # Build lst_summ_tbls ----
+
+lst_summ_tbls$visit_tbl <- 
+  bind_cols(lst_summ_cts$total_cts,
+            lst_summ_cts$visit_cts[, -1]) %>% 
+  arrange(tolower(uds_dx))
 
 # UDS Version table
 lst_summ_tbls$uds_vers_tbl <- 

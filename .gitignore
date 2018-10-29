@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 .DS_Store
+.gitignore
 *.csv
 *.xlsx
 *.xls
@@ -10,3 +11,7 @@ config.R
 *crontab*
 *.Rds
 *.rds
+*.history
+box_mri_test.R
+*.json
+.Rprofile

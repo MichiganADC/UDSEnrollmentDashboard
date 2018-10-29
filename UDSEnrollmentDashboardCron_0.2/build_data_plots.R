@@ -6,6 +6,7 @@ library(dplyr)
 library(ggplot2)
 
 deployed <- TRUE
+# deployed <- FALSE
 
 if (deployed) {
   path_to_app <-

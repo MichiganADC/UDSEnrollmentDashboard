@@ -9,6 +9,7 @@ library(mapdata)
 library(zipcode)
 
 deployed <- TRUE
+# deployed <- FALSE
 
 if (deployed) {
   path_to_app <-

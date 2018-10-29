@@ -6,6 +6,7 @@
 
 `%>%` <- magrittr::`%>%`
 deployed <- TRUE
+# deployed <- FALSE
 
 if (deployed) {
   path_to_app <- # Michigan Medicine R Shiny server
@@ -68,9 +69,8 @@ df_ms_xfrm <- df_ms %>%
 
 # _ UDS 2.0 data ----
 # _ _ ID data only ----
-fields_uds2 <- c('subject_id'       # partic. ID
-) %>% paste(collapse = ",")
-df_uds2 <- 
+fields_uds2 <- c('subject_id') %>% paste(collapse = ",") # partic. ID
+df_uds2 <-
   jsonlite::fromJSON(
     RCurl::postForm(
       uri=API_URL,
@@ -90,8 +90,8 @@ df_uds2 <-
       # .opts = list(ssl.verifypeer = TRUE, verbose = TRUE) # see note below*
       .opts = list(ssl.verifypeer = FALSE, verbose = TRUE)
     )
-  ) %>% 
-  dplyr::na_if("") %>% 
+  ) %>%
+  dplyr::na_if("") %>%
   dplyr::select(subject_id) # only keep `subject_id` field
 
 
@@ -167,7 +167,7 @@ fields_uds3 <-
     'fu_ftldmoif',  # Dx -- FTD
     'fu_ftldnos',   # Dx -- FTD
     'fu_ftldnoif',  # Dx -- FTD
-    condx_vctr      # Condx (10, initial & follow-up)
+    condx_vctr      # Condx (10 condx.s, initial & follow-up)
   ) %>% paste(collapse = ',')
 json_uds3 <- RCurl::postForm(
   uri=API_URL,
@@ -189,6 +189,7 @@ df_uds3 <- jsonlite::fromJSON(json_uds3) %>%
   dplyr::na_if("")
 df_uds3 <- df_uds3 %>% 
   dplyr::filter(!is.na(form_date))
+# _ _ Simplify UDS3 dx ----
 df_uds3 <- df_uds3 %>% 
   dplyr::mutate(uds_dx = dplyr::case_when(
     # Initial visits
@@ -450,6 +451,21 @@ df_ms_xfrm <- df_ms_xfrm %>%
 
 ## Arrange and clean `df_ms_xfrm` ----
 
+## Keep longitudinal data for visit table
+df_ms_xfrm_lng <- df_ms_xfrm %>% 
+  dplyr::select(subject_id, exam_date, uds_dx) %>% 
+  dplyr::arrange(subject_id, exam_date) %>%
+  dplyr::mutate(visit_unit = 1L) %>% 
+  dplyr::group_by(subject_id) %>% 
+  dplyr::mutate(visit_cumsum = cumsum(visit_unit)) %>% 
+  dplyr::arrange(subject_id, dplyr::desc(visit_cumsum)) %>% 
+  dplyr::distinct(subject_id, .keep_all = TRUE)
+# df_ms_xfrm_lng_tbl <- df_ms_xfrm_lng %>% 
+#   dplyr::group_by(uds_dx, visit_cumsum) %>% 
+#   dplyr::summarize(n = dplyr::n()) %>% 
+#   tidyr::spread(key = visit_cumsum, value = n)
+# names(df_ms_xfrm_lng_tbl)[-1] <- paste("Visit", names(df_ms_xfrm_lng_tbl[-1]))
+
 ## Arrange data frame by subject_id (1st), then exam_date (desc, 2nd)
 df_ms_xfrm <- df_ms_xfrm %>%
   dplyr::arrange(subject_id, dplyr::desc(exam_date))
@@ -466,7 +482,7 @@ df_uds2 <- df_uds2 %>%
   dplyr::mutate(uds_version = "UDS 2/3")
 
 # # # # # 
-## Left join `df_ms_xfrm`` and `df_uds2` ----
+## Left join `df_ms_xfrm` and `df_uds2` ----
 df_ms_xfrm <- df_ms_xfrm %>% 
   dplyr::left_join(df_uds2, by = "subject_id") %>% 
   dplyr::mutate(uds_version = 
@@ -475,6 +491,7 @@ df_ms_xfrm <- df_ms_xfrm %>%
 # # # # # 
 ## Save xformed MiNDSet data as RDS ----
 
+saveRDS(df_ms_xfrm_lng, paste0(path_to_app, "rds/df_ms_xfrm_lng.Rds"))
 saveRDS(df_ms_xfrm, paste0(path_to_app, "rds/df_ms_xfrm.Rds"))
 
 # * The REDCap server for some reason isn't able to verify the Shiny server

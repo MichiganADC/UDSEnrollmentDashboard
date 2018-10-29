@@ -34,6 +34,7 @@ library(mapdata)
 library(zipcode)
 
 deployed <- TRUE
+# deployed <- FALSE
 dt_options <- list(paging = FALSE,
                    searching = FALSE,
                    ordering = FALSE,
@@ -118,6 +119,14 @@ ui <- dashboardPage(
       tabItem( 
         tabName = "summary",
         h2("Summary Tables"),
+        fluidRow(
+          box(width = 12, h3("Visits"),
+              DT::dataTableOutput("visit"),
+              fluidRow(
+                box(
+                  downloadButton(outputId = "visit_dl",
+                                 label = "Download"),
+                  width = 12))) ),
         fluidRow( 
           box(width = 12, h3("UDS Version"), 
               DT::dataTableOutput("uds_vers"),
@@ -425,7 +434,7 @@ server <- function(input, output, session) {
   ## Render summary tables ----
   
   ## Use `observe` + `lapply` to render all the summary tables
-  summ_tbl_names <- c("uds_vers", "sex", "race", "sex_race", 
+  summ_tbl_names <- c("visit", "uds_vers", "sex", "race", "sex_race", 
                       "rsrch", "uds_rsrch", "sex_mri_yes", "race_mri_yes")
   observe({
     lapply(summ_tbl_names, function(tbl_name) {
